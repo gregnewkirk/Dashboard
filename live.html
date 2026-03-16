@@ -963,6 +963,9 @@ function reveal() {
   clearInterval(quizTimer);
   const r = document.querySelector('.answer-reveal');
   if(r) { r.classList.add('show'); playSfx('reveal'); }
+  // Reset cycle timer so answer stays on screen 18 seconds after reveal
+  clearTimeout(cycleTimer);
+  cycleTimer = setTimeout(() => transitionToNext(), 18000);
 }
 
 function startTotTimer() {
@@ -983,6 +986,9 @@ function revealTot() {
   clearInterval(quizTimer);
   const r = document.querySelector('.tot-reveal');
   if(r) { r.classList.add('show'); playSfx('reveal'); }
+  // Reset cycle timer so answer stays on screen 18 seconds after reveal
+  clearTimeout(cycleTimer);
+  cycleTimer = setTimeout(() => transitionToNext(), 18000);
 }
 
 // ============================================================
@@ -1126,7 +1132,7 @@ function drawShards() {
 let cycleTimer = null;
 
 function getCycleDuration() {
-  return (lastMode === 'quiz' || lastMode === 'thisorthat') ? 25000 : 20000;
+  return (lastMode === 'quiz' || lastMode === 'thisorthat') ? 50000 : 20000;
 }
 
 function startCycleTimer() {
