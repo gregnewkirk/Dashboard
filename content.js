@@ -1454,108 +1454,224 @@ const VIZ_LABELS = {
   plasmid:'Plasmid Cloning',crispr:'CRISPR-Cas9 Editing'
 };
 
+
 // ============================================================
-// SHOUTOUT SYSTEM — Stripe / Venmo / Patreon contributors
+// SHOUTOUT SYSTEM v2 — Portal Shift (30s) + Platform Colors
+// @drgregshow: Stripe, PayPal, Patreon, Venmo
 // ============================================================
-const SHOUTOUTS = [
-  // Add real contributors here — populated via webhook or manually
-  // Format: { name: "...", platform: "stripe|venmo|patreon", amount: "...", message: "..." }
-  { name: "Science Supporter", platform: "patreon", amount: "$5", message: "Love the show!" },
-  { name: "BioNerd42", platform: "venmo", amount: "$10", message: "Keep debunking!" },
-  { name: "Anonymous", platform: "stripe", amount: "$25", message: "" },
-];
 
 const PLATFORM_CONFIG = {
-  stripe:  { icon: "💳", color: "#6772e5", label: "Tip" },
-  venmo:   { icon: "💙", color: "#3d95ce", label: "Venmo" },
-  patreon: { icon: "🎨", color: "#ff424d", label: "Patreon" },
+  stripe:  { icon: '💳', color: '#6772e5', bg: '#6772e520', label: 'Tip via Stripe',   portalH: 255, portalS: 80, portalL: 55 },
+  paypal:  { icon: '🅿️',  color: '#003087', bg: '#00308720', label: 'PayPal Support',   portalH: 220, portalS: 90, portalL: 40 },
+  patreon: { icon: '🎨', color: '#ff424d', bg: '#ff424d20', label: 'Patreon Member',   portalH: 0,   portalS: 90, portalL: 55 },
+  venmo:   { icon: '💙', color: '#3d95ce', bg: '#3d95ce20', label: 'Venmo Support',    portalH: 210, portalS: 80, portalL: 52 },
 };
 
-// Call this to show a one-time shoutout overlay (e.g., triggered by webhook)
-function showShoutout(contributor) {
-  const cfg = PLATFORM_CONFIG[contributor.platform] || PLATFORM_CONFIG.stripe;
-  const el = document.createElement('div');
-  el.id = 'shoutout-toast';
-  el.style.cssText = `
-    position:fixed;
-    bottom:90px;
-    right:24px;
-    z-index:9999;
-    background:rgba(12,12,34,0.95);
-    border:2px solid ${cfg.color}60;
-    border-left:4px solid ${cfg.color};
-    border-radius:12px;
-    padding:14px 18px;
-    max-width:320px;
-    box-shadow:0 8px 32px rgba(0,0,0,0.6), 0 0 20px ${cfg.color}30;
-    animation:shoutoutIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
-    font-family:'DM Sans',sans-serif;
-  `;
-  el.innerHTML = `
-    <style>
-      @keyframes shoutoutIn {
-        from { opacity:0; transform:translateX(40px) scale(0.9); }
-        to   { opacity:1; transform:translateX(0) scale(1); }
-      }
-      @keyframes shoutoutOut {
-        from { opacity:1; transform:translateX(0) scale(1); }
-        to   { opacity:0; transform:translateX(40px) scale(0.9); }
-      }
-    </style>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-      <span style="font-size:1.4rem">${cfg.icon}</span>
-      <div>
-        <div style="font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:${cfg.color};margin-bottom:2px">${cfg.label} Shoutout</div>
-        <div style="font-size:1rem;font-weight:900;color:#fff">${contributor.name}</div>
-      </div>
-      ${contributor.amount ? `<div style="margin-left:auto;font-size:1rem;font-weight:900;color:#ffe080">${contributor.amount}</div>` : ''}
-    </div>
-    ${contributor.message ? `<div style="font-size:0.78rem;color:#ccc;font-style:italic;border-top:1px solid rgba(255,255,255,0.1);padding-top:6px;margin-top:4px">"${contributor.message}"</div>` : ''}
-    <div style="margin-top:8px;font-size:0.6rem;color:#666;font-weight:700;text-transform:uppercase;letter-spacing:1px">🧬 Thank you for supporting science!</div>
-  `;
+const SHOUTOUTS = [
+  // Populated by webhook — placeholders only
+  { name: 'Science Supporter', platform: 'patreon', amount: '$5',  message: 'Love the show!' },
+  { name: 'BioNerd42',         platform: 'venmo',   amount: '$10', message: 'Keep debunking!' },
+  { name: 'Anonymous',         platform: 'stripe',  amount: '$25', message: '' },
+];
 
-  // Remove existing toast if present
-  const existing = document.getElementById('shoutout-toast');
-  if (existing) existing.remove();
-
-  document.body.appendChild(el);
-
-  // Auto-dismiss after 6 seconds
-  setTimeout(() => {
-    el.style.animation = 'shoutoutOut 0.3s ease forwards';
-    setTimeout(() => el.remove(), 300);
-  }, 6000);
-}
-
-// Queue-based shoutout display — cycle through contributors during stream
-let _shoutoutQueue = [];
+let _shoutoutActive = false;
+let _shoutoutRestore = null;
 let _shoutoutTimer = null;
 
-function queueShoutouts(contributors) {
-  _shoutoutQueue = [...contributors];
-  clearInterval(_shoutoutTimer);
-  _shoutoutTimer = setInterval(() => {
-    if (_shoutoutQueue.length === 0) {
-      clearInterval(_shoutoutTimer);
-      return;
-    }
-    showShoutout(_shoutoutQueue.shift());
-  }, 15000); // Show one every 15 seconds
-  // Show first one immediately
-  if (_shoutoutQueue.length > 0) showShoutout(_shoutoutQueue.shift());
+function showShoutout(contributor) {
+  if (_shoutoutActive) return; // Don't interrupt existing shoutout
+  _shoutoutActive = true;
+
+  const cfg = PLATFORM_CONFIG[contributor.platform] || PLATFORM_CONFIG.stripe;
+
+  // ── 1. PORTAL SHIFT ─────────────────────────────────────────
+  // Save current portal target, blast to platform color
+  _shoutoutRestore = { h: portalTarget.h, s: portalTarget.s, l: portalTarget.l };
+  portalTarget.h = cfg.portalH;
+  portalTarget.s = cfg.portalS;
+  portalTarget.l = cfg.portalL;
+  transitionIntensity = 1.5; // Max energy burst
+
+  // Trigger EM pulses + tendrils
+  spawnEMPulse();
+  spawnEMPulse(cy + 40, H * 0.5);
+  for (let i = 0; i < TENDRIL_COUNT; i++) {
+    tendrils[i].active = false;
+    tendrils[i].cooldown = 0;
+  }
+
+  // ── 2. FULL-SCREEN OVERLAY ───────────────────────────────────
+  const overlay = document.createElement('div');
+  overlay.id = 'shoutout-overlay';
+  overlay.style.cssText = `
+    position:fixed; inset:0; z-index:10000;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:radial-gradient(ellipse at center, ${cfg.color}28 0%, rgba(0,0,0,0.88) 70%);
+    animation:sOverlayIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+    pointer-events:none;
+    font-family:'DM Sans',sans-serif;
+  `;
+
+  const amountStr = contributor.amount ? `<div class="s-amount">${contributor.amount}</div>` : '';
+  const msgStr = contributor.message ? `<div class="s-message">"${contributor.message}"</div>` : '';
+  const barId = 'shoutout-progress-bar';
+
+  overlay.innerHTML = `
+    <style>
+      @keyframes sOverlayIn  { from{opacity:0;transform:scale(0.96)} to{opacity:1;transform:scale(1)} }
+      @keyframes sOverlayOut { from{opacity:1;transform:scale(1)} to{opacity:0;transform:scale(1.04)} }
+      @keyframes sPulse { 0%,100%{text-shadow:0 0 40px ${cfg.color}80,0 0 80px ${cfg.color}40} 50%{text-shadow:0 0 80px ${cfg.color},0 0 160px ${cfg.color}60} }
+      @keyframes sNameIn { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+      @keyframes sAmountIn { from{opacity:0;transform:scale(0.5)} to{opacity:1;transform:scale(1)} }
+      @keyframes sMsgIn { from{opacity:0} to{opacity:1} }
+      @keyframes sBarDrain { from{width:100%} to{width:0%} }
+      .s-wrap { text-align:center; padding:40px; }
+      .s-platform-badge {
+        display:inline-flex; align-items:center; gap:10px;
+        background:${cfg.bg}; border:2px solid ${cfg.color}80;
+        border-radius:100px; padding:8px 24px; margin-bottom:24px;
+        font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:2px;
+        color:${cfg.color};
+      }
+      .s-platform-icon { font-size:1.4rem; }
+      .s-name {
+        font-size:clamp(3rem, 8vw, 6rem);
+        font-weight:900; color:#ffffff;
+        line-height:1; margin-bottom:12px;
+        animation:sNameIn 0.5s 0.2s both, sPulse 2s 0.7s infinite;
+        letter-spacing:-0.02em;
+      }
+      .s-amount {
+        font-size:clamp(2rem, 5vw, 4rem);
+        font-weight:900; color:${cfg.color};
+        animation:sAmountIn 0.6s 0.4s cubic-bezier(0.175,0.885,0.32,1.275) both;
+        margin-bottom:20px;
+      }
+      .s-message {
+        font-size:1.4rem; color:rgba(255,255,255,0.75);
+        font-style:italic; max-width:600px; line-height:1.5;
+        animation:sMsgIn 0.5s 0.7s both;
+        margin:0 auto 32px;
+      }
+      .s-thanks {
+        font-size:1rem; font-weight:800; text-transform:uppercase;
+        letter-spacing:3px; color:rgba(255,255,255,0.5);
+        animation:sMsgIn 0.5s 0.9s both;
+        margin-bottom:32px;
+      }
+      .s-progress-track {
+        width:min(500px, 80vw); height:4px;
+        background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;
+        margin:0 auto;
+      }
+      .s-progress-bar {
+        height:100%; background:${cfg.color};
+        border-radius:2px;
+        animation:sBarDrain 30s linear forwards;
+      }
+      .s-particles {
+        position:fixed; inset:0; pointer-events:none;
+        overflow:hidden; z-index:-1;
+      }
+      .s-particle {
+        position:absolute; border-radius:50%;
+        background:${cfg.color}; opacity:0;
+        animation:sPartFloat var(--dur) var(--delay) ease-out forwards;
+      }
+      @keyframes sPartFloat {
+        0%   { opacity:0.8; transform:translate(0,0) scale(1); }
+        100% { opacity:0;   transform:translate(var(--tx), var(--ty)) scale(0.3); }
+      }
+    </style>
+    <div class="s-particles" id="s-particles"></div>
+    <div class="s-wrap">
+      <div class="s-platform-badge">
+        <span class="s-platform-icon">${cfg.icon}</span>
+        <span>${cfg.label}</span>
+      </div>
+      <div class="s-name">${contributor.name}</div>
+      ${amountStr}
+      ${msgStr}
+      <div class="s-thanks">🧬 Thank you for supporting science!</div>
+      <div class="s-progress-track">
+        <div class="s-progress-bar" id="${barId}"></div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // ── 3. SPAWN PARTICLES ───────────────────────────────────────
+  const particleContainer = overlay.querySelector('#s-particles');
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 's-particle';
+    const size = 4 + Math.random() * 12;
+    const startX = Math.random() * 100;
+    const startY = 40 + Math.random() * 60;
+    const tx = (Math.random() - 0.5) * 400;
+    const ty = -(100 + Math.random() * 400);
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${startX}%; top:${startY}%;
+      --tx:${tx}px; --ty:${ty}px;
+      --dur:${1.5 + Math.random() * 2}s;
+      --delay:${Math.random() * 1}s;
+    `;
+    particleContainer.appendChild(p);
+  }
+
+  // ── 4. PLAY AUDIO ────────────────────────────────────────────
+  playSfx('materialize');
+  setTimeout(() => playSfx('shockwave'), 200);
+  setTimeout(() => playSfx('reveal'), 500);
+
+  // ── 5. DISMISS AFTER 30 SECONDS ──────────────────────────────
+  clearTimeout(_shoutoutTimer);
+  _shoutoutTimer = setTimeout(() => {
+    overlay.style.animation = 'sOverlayOut 0.5s ease forwards';
+    setTimeout(() => {
+      overlay.remove();
+      // Restore portal color
+      if (_shoutoutRestore) {
+        portalTarget.h = _shoutoutRestore.h;
+        portalTarget.s = _shoutoutRestore.s;
+        portalTarget.l = _shoutoutRestore.l;
+      }
+      _shoutoutActive = false;
+    }, 500);
+  }, 30000);
 }
 
-// Auto-cycle shoutouts from SHOUTOUTS array every 2 minutes during stream
+// Queue multiple shoutouts (plays sequentially, 35s apart to allow restore)
+let _shoutoutQueue = [];
+let _queueRunning = false;
+
+function queueShoutouts(contributors) {
+  _shoutoutQueue.push(...contributors);
+  if (!_queueRunning) _drainShoutoutQueue();
+}
+
+function _drainShoutoutQueue() {
+  if (_shoutoutQueue.length === 0) { _queueRunning = false; return; }
+  _queueRunning = true;
+  const next = _shoutoutQueue.shift();
+  showShoutout(next);
+  setTimeout(_drainShoutoutQueue, 35000);
+}
+
+// Auto-cycle placeholders every 2 minutes (dev/demo mode)
 function startShoutoutCycle() {
   if (SHOUTOUTS.length === 0) return;
   let idx = 0;
   setInterval(() => {
     showShoutout(SHOUTOUTS[idx % SHOUTOUTS.length]);
     idx++;
-  }, 120000); // Every 2 minutes
+  }, 120000);
 }
 
-// Expose globally for webhook use
+// Expose globally for webhook / browser console
 window.showShoutout = showShoutout;
 window.queueShoutouts = queueShoutouts;
 window.startShoutoutCycle = startShoutoutCycle;
+
