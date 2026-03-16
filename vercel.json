@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/webhook",           "destination": "/api/webhook.js" },
+    { "source": "/api/donations/latest",  "destination": "/api/donations/latest.js" }
+  ]
+}
