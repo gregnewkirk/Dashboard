@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#16213e"/></linearGradient></defs>
+  <circle cx="60" cy="60" r="58" fill="url(#bg)" stroke="#dbb976" stroke-width="2" opacity="0.9"/>
+  <!-- Guide RNA (hairpin loop) -->
+  <path d="M30,65 L30,40 Q30,25 45,25 Q60,25 60,40 L60,45" fill="none" stroke="#d0946e" stroke-width="2.5" opacity="0.8"/>
+  <path d="M60,45 L60,65" fill="none" stroke="#d0946e" stroke-width="2.5" opacity="0.8"/>
+  <!-- tracrRNA (her discovery) -->
+  <path d="M60,45 Q75,42 85,50 Q90,58 85,65" fill="none" stroke="#dbb976" stroke-width="2.5" opacity="0.8"/>
+  <!-- Target DNA -->
+  <line x1="20" y1="65" x2="100" y2="65" stroke="#8da3cc" stroke-width="2" opacity="0.4"/>
+  <line x1="20" y1="70" x2="100" y2="70" stroke="#8da3cc" stroke-width="2" opacity="0.4"/>
+  <!-- PAM site -->
+  <rect x="55" y="63" width="12" height="9" rx="1" fill="#85b89a" opacity="0.3"/>
+  <text x="61" y="70" text-anchor="middle" font-family="sans-serif" font-size="5" fill="#85b89a" opacity="0.7">PAM</text>
+  <!-- Binding indicators -->
+  <line x1="30" y1="65" x2="30" y2="62" stroke="#d0946e" stroke-width="1" opacity="0.5"/>
+  <line x1="38" y1="65" x2="38" y2="62" stroke="#d0946e" stroke-width="1" opacity="0.5"/>
+  <line x1="46" y1="65" x2="46" y2="62" stroke="#d0946e" stroke-width="1" opacity="0.5"/>
+  <!-- Nobel star -->
+  <polygon points="60,12 62,18 68,18 63,22 65,28 60,24 55,28 57,22 52,18 58,18" fill="#dbb976" opacity="0.7"/>
+  <!-- Bacteria (original context) -->
+  <ellipse cx="88" cy="30" rx="10" ry="6" fill="none" stroke="#85b89a" stroke-width="1.5" opacity="0.35" transform="rotate(-20,88,30)"/>
+  <text x="60" y="108" text-anchor="middle" font-family="sans-serif" font-size="7" font-weight="bold" fill="#dbb976" opacity="0.6">tracrRNA DISCOVERER</text>
+</svg>

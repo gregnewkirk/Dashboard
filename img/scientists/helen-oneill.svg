@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#16213e"/></linearGradient></defs>
+  <circle cx="60" cy="60" r="58" fill="url(#bg)" stroke="#d0946e" stroke-width="2" opacity="0.9"/>
+  <!-- Mitochondria (outer membrane) -->
+  <ellipse cx="60" cy="50" rx="32" ry="18" fill="#d0946e" opacity="0.1"/>
+  <ellipse cx="60" cy="50" rx="32" ry="18" fill="none" stroke="#d0946e" stroke-width="2.5" opacity="0.7"/>
+  <!-- Cristae (inner folds) -->
+  <path d="M38,50 Q42,38 52,42 Q48,55 55,50" fill="none" stroke="#dbb976" stroke-width="1.5" opacity="0.5"/>
+  <path d="M55,50 Q60,38 68,44 Q64,55 72,48" fill="none" stroke="#dbb976" stroke-width="1.5" opacity="0.5"/>
+  <path d="M72,48 Q78,40 82,50" fill="none" stroke="#dbb976" stroke-width="1.5" opacity="0.5"/>
+  <!-- mtDNA circle (inside) -->
+  <circle cx="55" cy="52" r="6" fill="none" stroke="#85b89a" stroke-width="1.5" opacity="0.6"/>
+  <circle cx="55" cy="52" r="3" fill="#85b89a" opacity="0.2"/>
+  <!-- Editing spark -->
+  <g transform="translate(75,72)">
+    <line x1="-5" y1="0" x2="5" y2="0" stroke="#dbb976" stroke-width="1.5" opacity="0.7"/>
+    <line x1="0" y1="-5" x2="0" y2="5" stroke="#dbb976" stroke-width="1.5" opacity="0.7"/>
+    <line x1="-3" y1="-3" x2="3" y2="3" stroke="#dbb976" stroke-width="1" opacity="0.5"/>
+    <line x1="3" y1="-3" x2="-3" y2="3" stroke="#dbb976" stroke-width="1" opacity="0.5"/>
+  </g>
+  <!-- ATP molecules -->
+  <text x="30" y="82" font-family="monospace" font-size="7" fill="#85b89a" opacity="0.4">ATP</text>
+  <text x="60" y="85" font-family="monospace" font-size="7" fill="#85b89a" opacity="0.3">ATP</text>
+  <text x="60" y="108" text-anchor="middle" font-family="sans-serif" font-size="7" font-weight="bold" fill="#d0946e" opacity="0.6">MITO GENETICS</text>
+</svg>

@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Dr. Greg — Science Show</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#1a1c2e;--surface:rgba(34,37,56,0.98);--surface-solid:#222538;
+      --border:rgba(255,255,255,0.22);--border-2:rgba(255,255,255,0.35);
+      --text:#ffffff;--text-2:#eee8e0;--text-3:#c0bdd0;
+      --gold:#ffd96e;--gold-dim:rgba(255,217,110,0.25);
+      --sage:#6ef0a8;--sage-dim:rgba(110,240,168,0.22);
+      --warm:#ffa870;--warm-dim:rgba(255,168,112,0.25);
+      --slate:#a0c8ff;--slate-dim:rgba(160,200,255,0.22);
+      --live:#ff5555;
+    }
+    html{font-size:200%}
+    body{
+      background:var(--bg);color:var(--text);
+      font-family:'DM Sans',-apple-system,sans-serif;
+      height:100vh;height:100dvh;overflow:hidden;
+      display:flex;justify-content:center;
+    }
+    .shell{
+      width:100%;max-width:720px;height:100vh;height:100dvh;
+      display:flex;flex-direction:column;position:relative;overflow:hidden;
+    }
+
+    /* === TICKER (top) === */
+    .ticker{
+      position:relative;z-index:20;
+      background:var(--surface-solid);
+      border-bottom:2px solid var(--border-2);
+      padding:8px 0;overflow:hidden;flex-shrink:0;
+    }
+    .ticker-track{
+      display:flex;white-space:nowrap;
+      animation:tkscroll 50s linear infinite;
+      font-size:0.75rem;font-weight:800;color:var(--text);letter-spacing:0.5px;
+    }
+    .ticker-track span{margin-right:36px}
+    .ticker-track .hl{color:var(--gold);font-weight:800}
+    .ticker-track .hl{color:var(--gold)}
+    @keyframes tkscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+    /* === MAIN STAGE === */
+    .stage{
+      flex:1;display:flex;flex-direction:column;
+      position:relative;z-index:10;overflow:hidden;
+    }
+
+    /* Top content panel — grows to fit, pushes viz down */
+    .content-panel{
+      flex:1 1 auto;position:relative;z-index:5;
+      overflow-y:auto;overflow-x:hidden;
+      padding:12px 14px;
+      display:flex;flex-direction:column;
+      scrollbar-width:none;
+      background:linear-gradient(180deg, var(--bg) 0%, rgba(26,28,46,0.7) 100%);
+    }
+    .content-panel::-webkit-scrollbar{display:none}
+
+    /* Floating stats */
+    .stats-row{
+      display:flex;gap:6px;flex-wrap:nowrap;justify-content:center;overflow:hidden;
+      margin-bottom:8px;height:2rem;align-items:center;
+    }
+    .stat-chip{
+      display:flex;align-items:center;gap:5px;white-space:nowrap;
+      padding:4px 10px;border-radius:6px;height:1.7rem;
+      font-family:'JetBrains Mono',monospace;
+      font-size:0.6rem;font-weight:800;
+      border:1px solid var(--border-2);
+      background:rgba(255,255,255,0.14);
+      color:var(--text);
+      animation:fadeIn 0.6s ease-out both;
+    }
+    .stat-chip .num{color:var(--gold);font-size:0.7rem;font-weight:900;text-shadow:0 0 10px rgba(255,217,110,0.5)}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+
+    /* Divider */
+    .divider{
+      height:2px;background:var(--border-2);flex-shrink:0;
+      position:relative;z-index:5;
+    }
+
+    /* Bottom canvas panel ~42% */
+    .viz-panel{
+      flex:0 1 38%;min-height:120px;position:relative;overflow:hidden;
+    }
+    .viz-panel canvas{
+      width:100%;height:100%;display:block;
+    }
+    .viz-label{
+      position:absolute;top:8px;left:50%;transform:translateX(-50%);
+      background:rgba(26,28,46,0.9);backdrop-filter:blur(8px);
+      padding:5px 14px;border-radius:8px;
+      font-size:0.6rem;font-weight:800;color:var(--text);
+      letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;
+      border:2px solid var(--border-2);z-index:5;
+    }
+
+    /* === BOTTOM BAR (branding) === */
+    .bottom-bar{
+      position:relative;z-index:20;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:10px 16px;
+      background:var(--surface-solid);
+      border-top:2px solid var(--border-2);
+      flex-shrink:0;
+    }
+    .brand{display:flex;align-items:center;gap:8px}
+    .brand-icon{
+      width:38px;height:38px;border-radius:8px;
+      background:linear-gradient(135deg,var(--sage),var(--gold));
+      display:flex;align-items:center;justify-content:center;font-size:18px;
+    }
+    .brand h1{font-size:1.05rem;font-weight:900;letter-spacing:-0.02em}
+    .brand .sub{font-size:0.65rem;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:1.5px}
+    .live-pill{
+      display:flex;align-items:center;gap:6px;
+      background:rgba(255,85,85,0.2);border:2px solid rgba(255,85,85,0.45);
+      padding:6px 16px;border-radius:16px;
+      font-size:0.7rem;font-weight:900;color:var(--live);letter-spacing:1.5px;
+    }
+    .live-dot{width:8px;height:8px;background:var(--live);border-radius:50%;animation:blink 1.2s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+    .audio-btn{
+      background:rgba(255,255,255,0.06);border:1px solid var(--border);
+      color:var(--text-2);width:38px;height:38px;border-radius:8px;
+      font-size:1.1rem;cursor:pointer;transition:all 0.2s;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .audio-btn:hover{background:var(--border);color:var(--text)}
+    .audio-btn.active{color:var(--gold);border-color:rgba(196,162,101,0.3);background:var(--gold-dim)}
+
+    /* === TRANSITIONS === */
+    .dissolve-out{animation:dissolveOut 0.3s ease-in forwards}
+    .dissolve-in{animation:dissolveIn 0.4s ease-out forwards}
+    @keyframes dissolveOut{
+      0%{opacity:1;filter:blur(0);transform:scale(1)}
+      100%{opacity:0;filter:blur(6px);transform:scale(0.97)}
+    }
+    @keyframes dissolveIn{
+      0%{opacity:0;filter:blur(8px);transform:scale(1.03)}
+      100%{opacity:1;filter:blur(0);transform:scale(1)}
+    }
+
+    /* === CYCLE PROGRESS BAR === */
+    .cycle-bar{
+      position:absolute;top:0;left:0;right:0;height:4px;z-index:30;
+      background:transparent;overflow:hidden;
+    }
+    .cycle-bar-fill{
+      height:100%;width:0%;
+      background:linear-gradient(90deg,var(--sage),var(--gold));
+      transition:width 1s linear;
+      box-shadow:0 0 10px rgba(255,217,110,0.6);
+    }
+
+    /* === MIC INDICATOR === */
+    .mic-pill{
+      display:flex;align-items:center;gap:5px;
+      font-size:0.5rem;font-weight:800;color:var(--text-2);
+      text-transform:uppercase;letter-spacing:1px;
+      padding:3px 8px;border-radius:10px;
+      background:rgba(255,255,255,0.1);border:1px solid var(--border-2);
+      transition:all 0.3s;cursor:pointer;
+    }
+    .mic-pill.listening{color:var(--sage);border-color:rgba(125,212,160,0.3);background:rgba(125,212,160,0.1)}
+    .mic-pill .mic-dot{width:6px;height:6px;border-radius:50%;background:var(--text-3);transition:all 0.3s}
+    .mic-pill.listening .mic-dot{background:var(--sage);box-shadow:0 0 6px rgba(125,212,160,0.5);animation:blink 1.2s infinite}
+
+    /* === BREATHING GLOW === */
+    .card{animation:breathGlow 4s ease-in-out infinite}
+    @keyframes breathGlow{
+      0%,100%{box-shadow:0 4px 24px rgba(0,0,0,0.5)}
+      50%{box-shadow:0 4px 28px rgba(255,217,110,0.2),0 4px 24px rgba(0,0,0,0.5)}
+    }
+
+    /* === SHARED COMPONENTS === */
+    .mode-enter{animation:dissolveIn 0.4s ease-out}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    .badge{
+      display:inline-flex;align-items:center;gap:5px;
+      padding:6px 14px;border-radius:6px;
+      font-size:0.75rem;font-weight:800;
+      text-transform:uppercase;letter-spacing:1.5px;
+    }
+    .badge-gold{background:rgba(255,217,110,0.3);color:var(--gold);border:1px solid rgba(255,217,110,0.5)}
+    .badge-sage{background:rgba(110,240,168,0.28);color:var(--sage);border:1px solid rgba(110,240,168,0.45)}
+    .badge-warm{background:rgba(255,168,112,0.3);color:var(--warm);border:1px solid rgba(255,168,112,0.5)}
+    .badge-slate{background:rgba(160,200,255,0.28);color:var(--slate);border:1px solid rgba(160,200,255,0.45)}
+    .card{
+      background:var(--surface);border:2px solid var(--border-2);
+      border-radius:14px;backdrop-filter:blur(10px);overflow:hidden;
+      box-shadow:0 4px 24px rgba(0,0,0,0.5);
+    }
+
+    /* === QUIZ === */
+    .mq{display:flex;flex-direction:column;gap:7px;flex:1}
+    .mq .card{border-left:4px solid var(--sage);background:rgba(110,240,168,0.1)}
+    .mq .q-box{padding:18px 14px 14px;text-align:center}
+    .mq .q-box h2{font-size:1.35rem;font-weight:900;line-height:1.3;letter-spacing:-0.01em;text-shadow:0 1px 8px rgba(0,0,0,0.5)}
+    .mq .opts{display:flex;flex-direction:column;gap:6px}
+    .mq .opt{
+      display:flex;align-items:center;gap:12px;
+      padding:11px 12px;background:rgba(34,37,56,0.9);
+      border:2px solid var(--border-2);border-radius:10px;
+      cursor:pointer;transition:all 0.2s;
+    }
+    .mq .opt:hover{border-color:var(--border-2);background:rgba(255,255,255,0.04)}
+    .mq .opt .ltr{
+      width:40px;height:40px;border-radius:8px;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:900;font-size:1.1rem;flex-shrink:0;
+    }
+    .mq .opt:nth-child(1) .ltr{background:rgba(255,168,112,0.35);color:var(--warm)}
+    .mq .opt:nth-child(2) .ltr{background:rgba(160,200,255,0.35);color:var(--slate)}
+    .mq .opt:nth-child(3) .ltr{background:rgba(110,240,168,0.35);color:var(--sage)}
+    .mq .opt .otxt{font-size:1.05rem;font-weight:700;text-align:left}
+    .mq .chat-cta{
+      text-align:center;padding:12px;
+      background:rgba(255,217,110,0.28);border:2px solid rgba(255,217,110,0.45);
+      border-radius:10px;
+    }
+    .mq .chat-cta h3{font-size:1.1rem;font-weight:900;color:var(--gold);margin-bottom:2px;text-shadow:0 1px 6px rgba(0,0,0,0.4)}
+    .mq .chat-cta p{font-size:0.8rem;color:var(--text-2)}
+    .timer-wrap{display:flex;align-items:center;gap:8px}
+    .timer-lbl{
+      font-family:'JetBrains Mono',monospace;
+      font-size:0.85rem;font-weight:800;color:var(--sage);white-space:nowrap;
+    }
+    .timer-track{flex:1;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden}
+    .timer-bar{height:100%;background:linear-gradient(90deg,var(--sage),var(--gold));border-radius:3px;width:100%;transition:width 1s linear}
+    .mq .answer-reveal{
+      display:none;padding:14px;text-align:center;
+      border:2px solid rgba(110,240,168,0.45);border-radius:10px;
+      background:rgba(110,240,168,0.2);
+    }
+    .mq .answer-reveal.show{display:block;animation:fadeUp 0.4s ease-out}
+    .mq .answer-reveal h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--sage);margin-bottom:4px;font-weight:800}
+    .mq .answer-reveal .ans{font-size:1.25rem;font-weight:900;margin-bottom:6px;text-shadow:0 1px 6px rgba(0,0,0,0.4)}
+    .mq .answer-reveal .expl{font-size:0.95rem;color:var(--text-2);line-height:1.5;font-weight:500}
+
+    /* === FACT === */
+    .mf{display:flex;flex-direction:column;gap:8px;flex:1}
+    .mf .fact-card{padding:0;border-left:4px solid var(--gold);background:rgba(255,217,110,0.1)}
+    .mf .fact-img{width:100%;height:160px;object-fit:cover;display:block}
+    .mf .fact-body{padding:14px;text-align:center}
+    .mf .fact-icon{font-size:2rem;margin-bottom:4px;display:block}
+    .mf .fact-body h2{font-size:1.3rem;font-weight:900;line-height:1.3;margin-bottom:8px;text-shadow:0 1px 8px rgba(0,0,0,0.5)}
+    .mf .fact-body p{font-size:1rem;color:var(--text-2);line-height:1.5;font-weight:500}
+    .mf .fact-source{font-size:0.75rem;color:var(--text-3);margin-top:8px;font-style:italic}
+
+    /* === NEWS === */
+    .mn{display:flex;flex-direction:column;gap:8px;flex:1}
+    .mn .news-card{padding:18px 14px;text-align:center;border-left:4px solid var(--slate);background:rgba(160,200,255,0.1)}
+    .mn .news-icon{font-size:2.2rem;margin-bottom:6px;display:block}
+    .mn .news-cat{font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--slate);margin-bottom:6px}
+    .mn .news-card h2{font-size:1.3rem;font-weight:900;line-height:1.3;margin-bottom:8px;text-shadow:0 1px 8px rgba(0,0,0,0.5)}
+    .mn .news-card p{font-size:1rem;color:var(--text-2);line-height:1.5;font-weight:500}
+    .mn .news-card .hl{color:var(--slate);font-weight:700}
+    .mn .news-source{
+      margin-top:12px;padding-top:10px;border-top:1px solid var(--border);
+      font-size:0.75rem;color:var(--text-3);font-weight:600;
+      display:flex;align-items:center;justify-content:center;gap:5px;
+    }
+    .mn .news-source .dot{width:3px;height:3px;border-radius:50%;background:var(--text-3)}
+
+    /* === THIS OR THAT === */
+    .mt{display:flex;flex-direction:column;gap:8px;flex:1}
+    .mt .tot-header{text-align:center;padding:6px}
+    .mt .tot-header h2{font-size:1.1rem;font-weight:900;color:var(--gold);text-shadow:0 1px 6px rgba(0,0,0,0.4)}
+    .mt .tot-header p{font-size:0.8rem;color:var(--text-2);margin-top:2px}
+    .mt .tot-vs{display:flex;gap:8px;flex:1;align-items:stretch}
+    .mt .tot-option{
+      flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:14px 10px;border-radius:14px;text-align:center;cursor:pointer;transition:all 0.2s;
+      border:2px solid var(--border-2);background:rgba(34,37,56,0.95);
+      box-shadow:0 4px 16px rgba(0,0,0,0.4);
+    }
+    .mt .tot-option:first-child{border-color:rgba(255,168,112,0.45);background:rgba(255,168,112,0.12)}
+    .mt .tot-option:last-child{border-color:rgba(160,200,255,0.45);background:rgba(160,200,255,0.12)}
+    .mt .tot-option:hover{border-color:var(--border-2);background:rgba(255,255,255,0.04)}
+    .mt .tot-option .tot-emoji{font-size:2.2rem;margin-bottom:6px;display:block}
+    .mt .tot-option .tot-label{font-size:1rem;font-weight:800;line-height:1.3}
+    .mt .tot-option .tot-letter{
+      font-size:0.75rem;font-weight:900;text-transform:uppercase;letter-spacing:2px;margin-top:6px;
+    }
+    .mt .tot-option:first-child .tot-letter{color:var(--warm)}
+    .mt .tot-option:last-child .tot-letter{color:var(--slate)}
+    .mt .tot-divider{
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.3rem;font-weight:900;color:var(--gold);align-self:center;
+    }
+    .mt .tot-reveal{
+      display:none;padding:12px;text-align:center;
+      border:2px solid rgba(255,217,110,0.45);border-radius:10px;
+      background:rgba(255,217,110,0.2);
+    }
+    .mt .tot-reveal.show{display:block;animation:fadeUp 0.4s ease-out}
+    .mt .tot-reveal h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);font-weight:800;margin-bottom:4px}
+    .mt .tot-reveal .ans{font-size:1.15rem;font-weight:900;margin-bottom:4px;text-shadow:0 1px 6px rgba(0,0,0,0.4)}
+    .mt .tot-reveal .expl{font-size:0.9rem;color:var(--text-2);line-height:1.45;font-weight:500}
+
+    /* Scientist Spotlight */
+    .ms .spot-card{background:rgba(255,217,110,0.1);border:2px solid var(--border-2);border-left:4px solid var(--gold);border-radius:14px;padding:16px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.5)}
+    .ms .spot-name{font-size:1.25rem;font-weight:900;color:var(--text);margin:6px 0 2px;text-shadow:0 1px 6px rgba(0,0,0,0.4)}
+    .ms .spot-title{font-size:0.75rem;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:2px}
+    .ms .spot-inst{font-size:0.75rem;color:var(--text-3);margin-bottom:10px}
+    .ms .spot-photo{width:80px;height:80px;border-radius:50%;margin:0 auto 4px;display:block}
+    .ms .spot-breakthrough{background:rgba(255,217,110,0.18);border:2px solid rgba(255,217,110,0.4);border-radius:10px;padding:12px;text-align:left;margin-top:10px}
+    .ms .spot-breakthrough h3{font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);font-weight:800;margin-bottom:6px}
+    .ms .spot-breakthrough p{font-size:0.88rem;color:var(--text-2);line-height:1.5;font-weight:500}
+    .ms .spot-breakthrough .hl{color:var(--text);font-weight:700}
+    .ms .spot-tags{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:10px}
+    .ms .spot-tag{font-size:0.6rem;padding:3px 8px;border-radius:20px;background:var(--sage-dim);color:var(--sage);font-weight:700;text-transform:uppercase;letter-spacing:0.8px}
+    .ms .spot-source{font-size:0.65rem;color:var(--text-3);margin-top:8px;font-style:italic}
+
+    /* Outbreak Report card */
+    .mo .outbreak-card{background:rgba(255,168,112,0.1);border:2px solid var(--border-2);border-left:4px solid var(--warm);border-radius:14px;padding:16px;box-shadow:0 4px 24px rgba(0,0,0,0.5)}
+    .mo .outbreak-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+    .mo .outbreak-emoji{font-size:2rem}
+    .mo .outbreak-disease{font-size:0.65rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;color:var(--warm);padding:3px 10px;border-radius:20px;background:rgba(255,168,112,0.25);border:2px solid rgba(255,168,112,0.45)}
+    .mo .outbreak-status{font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:var(--text-3)}
+    .mo .outbreak-headline{font-size:1.15rem;font-weight:900;color:var(--text);margin-bottom:14px;line-height:1.3}
+    .mo .outbreak-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+    .mo .ob-stat{background:rgba(255,255,255,0.14);border:2px solid var(--border-2);border-radius:8px;padding:8px 10px;text-align:center}
+    .mo .ob-stat-val{font-size:1.1rem;font-weight:900;font-family:'JetBrains Mono',monospace}
+    .mo .ob-stat-val.up{color:#e06060}.mo .ob-stat-val.down{color:var(--sage)}.mo .ob-stat-val.baseline{color:var(--text-2)}
+    .mo .ob-stat-label{font-size:0.6rem;color:var(--text-3);margin-top:2px}
+    .mo .outbreak-detail{font-size:0.88rem;color:var(--text-2);line-height:1.5;margin-bottom:8px}
+    .mo .outbreak-detail .hl{color:var(--text);font-weight:700}
+    .mo .outbreak-cdc{font-size:0.65rem;color:var(--text-3);font-style:italic}
+
+    /* Breakthrough card */
+    .mb .break-card{background:rgba(255,217,110,0.1);border:2px solid var(--border-2);border-left:4px solid var(--gold);border-radius:14px;padding:16px;box-shadow:0 4px 24px rgba(0,0,0,0.5)}
+    .mb .break-year{display:inline-block;font-size:0.65rem;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(219,185,118,0.2);padding:3px 10px;border-radius:20px;margin-bottom:6px}
+    .mb .break-emoji{font-size:2.2rem;margin-bottom:4px}
+    .mb .break-title{font-size:1.15rem;font-weight:900;color:var(--text);margin-bottom:10px;line-height:1.3}
+    .mb .break-simple{font-size:0.92rem;color:var(--text-2);line-height:1.55;margin-bottom:12px}
+    .mb .break-simple .hl{color:var(--text);font-weight:700}
+    .mb .break-impact{background:rgba(110,240,168,0.18);border:2px solid rgba(110,240,168,0.4);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+    .mb .break-impact-label{font-size:0.6rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;color:var(--sage);margin-bottom:4px}
+    .mb .break-impact-text{font-size:0.85rem;color:var(--text-2);line-height:1.4}
+    .mb .break-source{font-size:0.65rem;color:var(--text-3);font-style:italic}
+
+    /* Myth Buster card */
+    .mm .myth-card{background:rgba(255,100,100,0.1);border:2px solid var(--border-2);border-left:4px solid #ff6060;border-radius:14px;padding:16px;box-shadow:0 4px 24px rgba(0,0,0,0.5)}
+    .mm .myth-verdict{display:inline-block;font-size:0.7rem;font-weight:900;letter-spacing:1.5px;padding:4px 14px;border-radius:20px;margin-bottom:8px}
+    .mm .myth-verdict.false{background:rgba(255,100,100,0.3);color:#ff7070;border:2px solid rgba(255,100,100,0.55)}
+    .mm .myth-verdict.misleading{background:rgba(255,217,110,0.3);color:var(--gold);border:2px solid rgba(255,217,110,0.55)}
+    .mm .myth-verdict.misunderstood{background:rgba(160,200,255,0.3);color:var(--slate);border:2px solid rgba(160,200,255,0.55)}
+    .mm .myth-claim{font-size:1.1rem;font-weight:900;color:#e06060;margin-bottom:10px;line-height:1.3}
+    .mm .myth-claim::before{content:'"';opacity:0.4}.mm .myth-claim::after{content:'"';opacity:0.4}
+    .mm .myth-conspiracy{font-size:0.82rem;color:var(--text-3);margin-bottom:12px;font-style:italic}
+    .mm .myth-science-label{font-size:0.6rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;color:var(--sage);margin-bottom:6px}
+    .mm .myth-science{font-size:0.88rem;color:var(--text-2);line-height:1.55;margin-bottom:10px}
+    .mm .myth-science .hl{color:var(--text);font-weight:700}
+    .mm .myth-evidence{font-size:0.7rem;color:var(--text-3);font-style:italic}
+
+    /* Read More links */
+    .read-more{display:inline-block;margin-top:8px;padding:5px 14px;border-radius:6px;font-size:0.6rem;font-weight:800;
+      text-decoration:none;color:var(--gold);border:2px solid rgba(255,217,110,0.5);background:rgba(255,217,110,0.25);
+      letter-spacing:0.5px;transition:all 0.2s}
+    .read-more:hover{background:rgba(237,201,111,0.3);border-color:var(--gold)}
+
+    /* Landscape warning */
+    @media(orientation:landscape) and (max-height:500px){
+      body::after{
+        content:'Rotate to portrait';position:fixed;inset:0;
+        background:var(--bg);display:flex;align-items:center;
+        justify-content:center;font-size:1.1rem;color:var(--text-2);z-index:9999;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <!-- CYCLE PROGRESS BAR -->
+  <div class="cycle-bar"><div class="cycle-bar-fill" id="cycleBar"></div></div>
+  <!-- TICKER - TOP -->
+  <div class="ticker"><div class="ticker-track" id="ticker"></div></div>
+
+  <!-- MAIN STAGE -->
+  <div class="stage">
+    <!-- Top: Content -->
+    <div class="content-panel" id="content-panel">
+      <div class="stats-row" id="stats"></div>
+      <div id="content"></div>
+    </div>
+    <!-- Divider -->
+    <div class="divider"></div>
+    <!-- Bottom: Canvas visualization -->
+    <div class="viz-panel">
+      <canvas id="viz"></canvas>
+      <div class="viz-label" id="viz-label"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <div class="brand">
+      <div class="brand-icon">🧬</div>
+      <div><h1>Dr. Greg Show</h1><div class="sub">drgregshow.com</div></div>
+    </div>
+    <div class="live-pill"><div class="live-dot"></div> LIVE</div>
+    <div class="mic-pill" id="micPill" onclick="toggleMic()" title="Toggle mic"><div class="mic-dot"></div>MIC</div>
+    <button class="audio-btn active" id="audioBtn" onclick="toggleAudio()" title="Mute / Unmute">&#x266B;</button>
+  </div>
+</div>
+
+<script src="content.js"></script>
+<script>
+let currentViz = null;
+let vizRAF = null;
+
+function initViz(){
+  const canvas = document.getElementById('viz');
+  const panel = canvas.parentElement;
+  const dpr = 3;
+  canvas.width = panel.clientWidth * dpr;
+  canvas.height = panel.clientHeight * dpr;
+  canvas.style.width = panel.clientWidth + 'px';
+  canvas.style.height = panel.clientHeight + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const W = panel.clientWidth, H = panel.clientHeight;
+  if(vizRAF) cancelAnimationFrame(vizRAF);
+  const type = pickUnique(VIZ_TYPES,'viz');
+  currentViz = type;
+  document.getElementById('viz-label').textContent = VIZ_LABELS[type]||type;
+  const C={gold:'#c4a265',sage:'#6b8f7a',slate:'#6b7fa6',warm:'#b07a5e',rose:'#a06b6b'};
+  ctx.fillStyle='#0a0a0e';ctx.fillRect(0,0,W,H);
+  VIZ_FNS[type](ctx,W,H,C);
+}
+
+const BG='rgba(10,10,14,';
+// Voice reactivity helpers for viz — call inside draw loops
+function vScale(base){return base*(1+micLevel*1.5)} // scale sizes with voice
+function vSpeed(base){return base*(1+micLevel*2)} // speed up with voice
+function vAlpha(base){return Math.min(1,base*(1+micLevel*2))} // brighten with voice
+const VIZ_FNS = {
+
+// 1. DNA DOUBLE HELIX
+dna(ctx,W,H,C){let t=0;const n=30;const amp=W*0.22;(function d(){ctx.fillStyle=BG+'0.12)';ctx.fillRect(0,0,W,H);t+=vSpeed(0.02);
+for(let i=0;i<n;i++){const y=((i/n)*H*1.3+t*30)%H-H*0.15,p=i*0.5+t*2,x1=W/2+Math.sin(p)*amp,x2=W/2-Math.sin(p)*amp,dp=Math.cos(p);
+// Glow on strands
+const gc=dp>0?C.gold:C.sage;ctx.fillStyle=gc;ctx.globalAlpha=0.08;ctx.beginPath();ctx.arc(x1,y,14,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(x2,y,14,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=gc;ctx.globalAlpha=0.5+Math.abs(dp)*0.4;ctx.lineWidth=3;
+ctx.beginPath();ctx.arc(x1,y,6,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.arc(x2,y,6,0,Math.PI*2);ctx.stroke();
+ctx.strokeStyle=C.slate;ctx.globalAlpha=0.25+Math.abs(dp)*0.35;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();
+ctx.fillStyle=gc;ctx.globalAlpha=0.85;ctx.beginPath();ctx.arc(x1,y,4.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(x2,y,4.5,0,Math.PI*2);ctx.fill();}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 2. NEURAL NETWORK
+neurons(ctx,W,H,C){const ns=[];for(let i=0;i<40;i++)ns.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,r:3+Math.random()*3});
+const ps=[];let t=0;(function d(){ctx.fillStyle=BG+'0.06)';ctx.fillRect(0,0,W,H);t++;
+const mv=1+micLevel*3;ns.forEach(n=>{n.x+=n.vx*mv;n.y+=n.vy*mv;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1});
+for(let i=0;i<ns.length;i++)for(let j=i+1;j<ns.length;j++){const dx=ns[j].x-ns[i].x,dy=ns[j].y-ns[i].y,dist=Math.sqrt(dx*dx+dy*dy);
+if(dist<130){ctx.strokeStyle=C.slate;ctx.globalAlpha=0.15*(1-dist/130);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(ns[i].x,ns[i].y);ctx.lineTo(ns[j].x,ns[j].y);ctx.stroke()}}
+if(t%20===0){const a=ns[~~(Math.random()*ns.length)],b=ns[~~(Math.random()*ns.length)];if(a!==b)ps.push({x:a.x,y:a.y,tx:b.x,ty:b.y,p:0})}
+for(let i=ps.length-1;i>=0;i--){const p=ps[i];p.p+=0.03;if(p.p>=1){ps.splice(i,1);continue}
+const px=p.x+(p.tx-p.x)*p.p,py=p.y+(p.ty-p.y)*p.p;
+ctx.fillStyle=C.gold;ctx.globalAlpha=0.9*(1-p.p);ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fill();
+ctx.globalAlpha=0.25*(1-p.p);ctx.beginPath();ctx.arc(px,py,12,0,Math.PI*2);ctx.fill()}
+ns.forEach(n=>{ctx.fillStyle=C.sage;ctx.globalAlpha=0.15;ctx.beginPath();ctx.arc(n.x,n.y,n.r+6,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.85;ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fill()});
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 3. CELL DIVISION
+cells(ctx,W,H,C){const cs=[];const cols=[C.sage,C.slate,C.warm,'#a06b6b'];
+for(let i=0;i<20;i++)cs.push({x:Math.random()*W,y:Math.random()*H,r:18+Math.random()*24,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4,c:cols[~~(Math.random()*4)],ph:Math.random()*6.28});
+let t=0;(function d(){ctx.fillStyle=BG+'0.05)';ctx.fillRect(0,0,W,H);t+=vSpeed(0.01);
+const mv=1+micLevel*2;cs.forEach(c=>{c.x+=c.vx*mv;c.y+=c.vy*mv;if(c.x<c.r||c.x>W-c.r)c.vx*=-1;if(c.y<c.r||c.y>H-c.r)c.vy*=-1;
+const w=Math.sin(t*2+c.ph)*4;
+// Outer glow
+ctx.fillStyle=c.c;ctx.globalAlpha=0.06;ctx.beginPath();ctx.ellipse(c.x,c.y,c.r+w+8,c.r-w*0.5+8,t+c.ph,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=c.c;ctx.globalAlpha=0.6;ctx.lineWidth=2.5;
+ctx.beginPath();ctx.ellipse(c.x,c.y,c.r+w,c.r-w*0.5,t+c.ph,0,Math.PI*2);ctx.stroke();
+ctx.fillStyle=c.c;ctx.globalAlpha=0.1;ctx.beginPath();ctx.ellipse(c.x,c.y,c.r+w-2,c.r-w*0.5-2,t+c.ph,0,Math.PI*2);ctx.fill();
+// Nucleus
+ctx.fillStyle=c.c;ctx.globalAlpha=0.5;ctx.beginPath();ctx.arc(c.x+Math.sin(t+c.ph)*3,c.y+Math.cos(t+c.ph)*3,c.r*0.3,0,Math.PI*2);ctx.fill();
+// Organelles
+for(let o=0;o<3;o++){const ox=c.x+Math.cos(t*1.5+c.ph+o*2.1)*c.r*0.5,oy=c.y+Math.sin(t*1.5+c.ph+o*2.1)*c.r*0.4;
+ctx.fillStyle=c.c;ctx.globalAlpha=0.25;ctx.beginPath();ctx.arc(ox,oy,2.5,0,Math.PI*2);ctx.fill()}});
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 4. MOLECULAR MOTION
+particles(ctx,W,H,C){const pts=[];const cols=[C.gold,C.sage,C.slate,C.warm];
+for(let i=0;i<90;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*1.2,vy:(Math.random()-0.5)*1.2,r:2+Math.random()*3,c:cols[~~(Math.random()*4)]});
+(function d(){ctx.fillStyle=BG+'0.08)';ctx.fillRect(0,0,W,H);
+const mv=1+micLevel*3;pts.forEach(p=>{p.x+=p.vx*mv;p.y+=p.vy*mv;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+p.vx+=(W/2-p.x)*0.00005;p.vy+=(H/2-p.y)*0.00005;p.vx*=0.999;p.vy*=0.999;
+ctx.fillStyle=p.c;ctx.globalAlpha=0.1;ctx.beginPath();ctx.arc(p.x,p.y,p.r+5,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=p.c;ctx.globalAlpha=0.75;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+ctx.globalAlpha=0.2;ctx.beginPath();ctx.arc(p.x-p.vx*3,p.y-p.vy*3,p.r*0.7,0,Math.PI*2);ctx.fill()});
+for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[j].x-pts[i].x,dy=pts[j].y-pts[i].y,dd=Math.sqrt(dx*dx+dy*dy);
+if(dd<60){ctx.strokeStyle=pts[i].c;ctx.globalAlpha=0.15*(1-dd/60);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke()}}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 5. WAVE INTERFERENCE
+waves(ctx,W,H,C){let t=0;const cols=[C.gold,C.sage,C.slate];
+(function d(){ctx.fillStyle=BG+'0.08)';ctx.fillRect(0,0,W,H);t+=0.03;
+for(let w=0;w<3;w++){ctx.strokeStyle=cols[w];ctx.globalAlpha=0.35;ctx.lineWidth=1.5;ctx.beginPath();
+for(let x=0;x<W;x+=2){const y=H/2+Math.sin(x*0.02+t+w*2)*30*Math.sin(x*0.005+t*0.5)+Math.sin(x*0.04+t*1.5+w)*15;
+if(x===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.stroke()}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 6. BLOOD FLOW — red cells flowing through a vessel
+bloodflow(ctx,W,H,C){const rbcs=[];const vesselH=H*0.35;
+for(let i=0;i<50;i++)rbcs.push({x:Math.random()*W*1.5-W*0.25,y:H/2+(Math.random()-0.5)*vesselH*0.7,s:0.6+Math.random()*1,r:6+Math.random()*5,wobble:Math.random()*6.28});
+let t=0;(function d(){ctx.fillStyle=BG+'0.1)';ctx.fillRect(0,0,W,H);t+=0.02;
+// Vessel wall glow
+ctx.fillStyle=C.warm;ctx.globalAlpha=0.04;ctx.fillRect(0,H/2-vesselH/2-10,W,vesselH+20);
+// Vessel walls
+ctx.strokeStyle=C.warm;ctx.globalAlpha=0.3;ctx.lineWidth=3;
+ctx.beginPath();ctx.moveTo(0,H/2-vesselH/2);for(let x=0;x<W;x+=4)ctx.lineTo(x,H/2-vesselH/2+Math.sin(x*0.01+t)*5);ctx.stroke();
+ctx.beginPath();ctx.moveTo(0,H/2+vesselH/2);for(let x=0;x<W;x+=4)ctx.lineTo(x,H/2+vesselH/2+Math.sin(x*0.01+t)*5);ctx.stroke();
+// RBCs
+rbcs.forEach(c=>{c.x+=c.s;c.y+=Math.sin(t*3+c.wobble)*0.4;if(c.x>W+25)c.x=-25;
+ctx.fillStyle=C.warm;ctx.globalAlpha=0.08;ctx.beginPath();ctx.ellipse(c.x,c.y,c.r+4,c.r*0.6+4,Math.sin(t+c.wobble)*0.3,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=C.warm;ctx.globalAlpha=0.6+c.r*0.03;
+ctx.beginPath();ctx.ellipse(c.x,c.y,c.r,c.r*0.6,Math.sin(t+c.wobble)*0.3,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='#0a0a0e';ctx.globalAlpha=0.25;ctx.beginPath();ctx.arc(c.x,c.y,c.r*0.3,0,Math.PI*2);ctx.fill()});
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 7. SYNAPSE — neurotransmitter release
+synapse(ctx,W,H,C){let t=0;const vesicles=[];
+(function d(){ctx.fillStyle=BG+'0.1)';ctx.fillRect(0,0,W,H);t+=0.02;
+// Pre-synaptic terminal
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.12;ctx.beginPath();ctx.arc(W/2,H*0.2,60,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=C.sage;ctx.globalAlpha=0.3;ctx.lineWidth=2;ctx.beginPath();ctx.arc(W/2,H*0.2,60,0,Math.PI*2);ctx.stroke();
+// Post-synaptic terminal
+ctx.fillStyle=C.slate;ctx.globalAlpha=0.12;ctx.beginPath();ctx.arc(W/2,H*0.8,60,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=C.slate;ctx.globalAlpha=0.3;ctx.lineWidth=2;ctx.beginPath();ctx.arc(W/2,H*0.8,60,0,Math.PI*2);ctx.stroke();
+// Receptors
+for(let i=-3;i<=3;i++){ctx.fillStyle=C.slate;ctx.globalAlpha=0.4;ctx.fillRect(W/2+i*16-3,H*0.8-62,6,10)}
+// Release vesicles periodically
+if(Math.random()<0.06)vesicles.push({x:W/2+(Math.random()-0.5)*40,y:H*0.2+55,vy:0.5+Math.random()*0.5,a:1,r:3+Math.random()*2});
+for(let i=vesicles.length-1;i>=0;i--){const v=vesicles[i];v.y+=v.vy;v.x+=Math.sin(t*5+i)*0.5;
+if(v.y>H*0.8-60){v.a-=0.03}if(v.a<=0){vesicles.splice(i,1);continue}
+ctx.fillStyle=C.gold;ctx.globalAlpha=v.a*0.7;ctx.beginPath();ctx.arc(v.x,v.y,v.r,0,Math.PI*2);ctx.fill();
+ctx.globalAlpha=v.a*0.2;ctx.beginPath();ctx.arc(v.x,v.y,v.r*2.5,0,Math.PI*2);ctx.fill()}
+// Synaptic cleft label line
+ctx.strokeStyle=C.gold;ctx.globalAlpha=0.08;ctx.lineWidth=0.5;ctx.setLineDash([4,4]);
+ctx.beginPath();ctx.moveTo(W*0.1,H*0.5);ctx.lineTo(W*0.9,H*0.5);ctx.stroke();ctx.setLineDash([]);
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 8. HEARTBEAT — pulsing heart + ECG trace
+heartbeat(ctx,W,H,C){let t=0;const ecg=[];
+(function d(){ctx.fillStyle=BG+'0.12)';ctx.fillRect(0,0,W,H);t+=vSpeed(0.03);
+// ECG trace
+const ecgY=H*0.7;ecg.push(Math.sin(t*2)*2+(t%3<0.3?Math.sin(t*20)*20*(1-Math.abs(t%3-0.15)/0.15):0));
+if(ecg.length>W)ecg.shift();
+ctx.strokeStyle=C.sage;ctx.globalAlpha=0.6;ctx.lineWidth=1.5;ctx.beginPath();
+ecg.forEach((v,i)=>{if(i===0)ctx.moveTo(i,ecgY+v);else ctx.lineTo(i,ecgY+v)});ctx.stroke();
+// Dot at end
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.9;ctx.beginPath();ctx.arc(ecg.length-1,ecgY+ecg[ecg.length-1],3,0,Math.PI*2);ctx.fill();
+// Pulsing heart
+const beat=Math.sin(t*2);const scale=1+Math.max(0,beat)*0.15;const cx=W/2,cy=H*0.35;
+ctx.save();ctx.translate(cx,cy);ctx.scale(scale,scale);
+ctx.fillStyle=C.warm;ctx.globalAlpha=0.06+Math.max(0,beat)*0.08;
+ctx.beginPath();ctx.arc(-15,-5,22,0,Math.PI*2);ctx.arc(15,-5,22,0,Math.PI*2);ctx.moveTo(-37,0);
+ctx.bezierCurveTo(-37,25,0,45,0,55);ctx.bezierCurveTo(0,45,37,25,37,0);ctx.fill();
+ctx.strokeStyle=C.warm;ctx.globalAlpha=0.3+Math.max(0,beat)*0.3;ctx.lineWidth=1.5;
+ctx.beginPath();ctx.arc(-15,-5,22,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.arc(15,-5,22,0,Math.PI*2);ctx.stroke();
+ctx.restore();ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 9. FLOCKING BEHAVIOR (Boids)
+boids(ctx,W,H,C){const bs=[];for(let i=0;i<80;i++)bs.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2});
+(function d(){ctx.fillStyle=BG+'0.1)';ctx.fillRect(0,0,W,H);
+bs.forEach(b=>{let sx=0,sy=0,cx=0,cy=0,ax=0,ay=0,n=0;
+bs.forEach(o=>{if(o===b)return;const dx=o.x-b.x,dy=o.y-b.y,dd=dx*dx+dy*dy;
+if(dd<2500){n++;cx+=o.x;cy+=o.y;sx+=o.vx;sy+=o.vy;if(dd<400){ax-=dx;ay-=dy}}});
+if(n>0){cx=cx/n-b.x;cy=cy/n-b.y;sx=sx/n-b.vx;sy=sy/n-b.vy;
+b.vx+=cx*0.003+sx*0.05+ax*0.05;b.vy+=cy*0.003+sy*0.05+ay*0.05}
+const mxSpd=2+micLevel*4;const spd=Math.sqrt(b.vx*b.vx+b.vy*b.vy);if(spd>mxSpd){b.vx=(b.vx/spd)*mxSpd;b.vy=(b.vy/spd)*mxSpd}
+b.x+=b.vx;b.y+=b.vy;if(b.x<0)b.x=W;if(b.x>W)b.x=0;if(b.y<0)b.y=H;if(b.y>H)b.y=0;
+const ang=Math.atan2(b.vy,b.vx);ctx.save();ctx.translate(b.x,b.y);ctx.rotate(ang);
+ctx.fillStyle=C.gold;ctx.globalAlpha=0.07;ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-6,-5);ctx.lineTo(-6,5);ctx.closePath();ctx.fill();
+ctx.fillStyle=C.gold;ctx.globalAlpha=0.7;ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(-4,-3);ctx.lineTo(-4,3);ctx.closePath();ctx.fill();ctx.restore()});
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 10. FRACTAL TREE
+fractree(ctx,W,H,C){let growth=0;const cols=[C.sage,C.gold,C.warm];
+function branch(x,y,len,ang,depth,maxD){if(depth>maxD||len<2)return;
+const ex=x+Math.cos(ang)*len,ey=y+Math.sin(ang)*len;
+ctx.strokeStyle=cols[depth%3];ctx.globalAlpha=0.3+0.1*(maxD-depth);ctx.lineWidth=Math.max(0.5,3-depth*0.4);
+ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(ex,ey);ctx.stroke();
+if(depth<maxD){branch(ex,ey,len*0.7,ang-0.4-Math.sin(growth+depth)*0.1,depth+1,maxD);
+branch(ex,ey,len*0.7,ang+0.4+Math.sin(growth+depth)*0.1,depth+1,maxD);
+if(depth<3)branch(ex,ey,len*0.5,ang+Math.sin(growth*2)*0.3,depth+1,maxD)}}
+(function d(){ctx.fillStyle=BG+'0.15)';ctx.fillRect(0,0,W,H);growth+=0.01;
+const maxD=Math.min(9,~~(growth*3)+5);branch(W/2,H*0.95,H*0.22,-Math.PI/2,0,maxD);
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 11. FIBONACCI SPIRAL
+fibonacci(ctx,W,H,C){let t=0;(function d(){ctx.fillStyle=BG+'0.06)';ctx.fillRect(0,0,W,H);t+=0.005;
+const cx=W/2,cy=H/2,golden=2.399963;
+for(let i=0;i<300;i++){const r=Math.sqrt(i)*6;const th=i*golden+t;
+const x=cx+Math.cos(th)*r,y=cy+Math.sin(th)*r;
+if(x<-10||x>W+10||y<-10||y>H+10)continue;
+const sz=1+i*0.005;const cols=[C.gold,C.sage,C.slate];
+ctx.fillStyle=cols[i%3];ctx.globalAlpha=0.3+Math.sin(t*3+i*0.1)*0.2;
+ctx.beginPath();ctx.arc(x,y,sz,0,Math.PI*2);ctx.fill()}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 12. LISSAJOUS CURVES
+lissajous(ctx,W,H,C){let t=0;(function d(){ctx.fillStyle=BG+'0.03)';ctx.fillRect(0,0,W,H);t+=0.008;
+const cx=W/2,cy=H/2,A=W*0.35,B=H*0.35;
+const freqs=[[3,2],[5,4],[3,4]];const cols=[C.gold,C.sage,C.slate];
+freqs.forEach(([a,b],fi)=>{ctx.strokeStyle=cols[fi];ctx.globalAlpha=0.3;ctx.lineWidth=1;ctx.beginPath();
+for(let i=0;i<=500;i++){const s=i/500*Math.PI*2;const x=cx+Math.sin(a*s+t+fi)*A*0.8;const y=cy+Math.sin(b*s+t*0.7)*B*0.8;
+if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.stroke()});
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 13. PENDULUM WAVES
+pendwaves(ctx,W,H,C){let t=0;const n=18;
+(function d(){ctx.fillStyle=BG+'0.15)';ctx.fillRect(0,0,W,H);t+=0.04;
+for(let i=0;i<n;i++){const freq=0.8+i*0.06;const x=W*0.1+i*(W*0.8/(n-1));
+const ang=Math.sin(t*freq)*1.2;const len=H*0.55;
+const bx=x+Math.sin(ang)*len,by=10+Math.cos(ang)*len;
+// String
+ctx.strokeStyle=C.slate;ctx.globalAlpha=0.2;ctx.lineWidth=0.8;
+ctx.beginPath();ctx.moveTo(x,10);ctx.lineTo(bx,by);ctx.stroke();
+// Bob
+ctx.fillStyle=C.gold;ctx.globalAlpha=0.6;ctx.beginPath();ctx.arc(bx,by,4,0,Math.PI*2);ctx.fill();
+// Trail
+ctx.fillStyle=C.gold;ctx.globalAlpha=0.1;ctx.beginPath();ctx.arc(bx,by,8,0,Math.PI*2);ctx.fill()}
+// Top bar
+ctx.strokeStyle=C.slate;ctx.globalAlpha=0.3;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(W*0.05,10);ctx.lineTo(W*0.95,10);ctx.stroke();
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 14. LORENZ ATTRACTOR
+lorenz(ctx,W,H,C){let x=0.1,y=0,z=0;const pts=[];
+(function d(){ctx.fillStyle=BG+'0.03)';ctx.fillRect(0,0,W,H);
+for(let i=0;i<5;i++){const dt=0.005,s=10,r=28,b=8/3;
+const dx=s*(y-x)*dt,dy=(x*(r-z)-y)*dt,dz=(x*y-b*z)*dt;
+x+=dx;y+=dy;z+=dz;pts.push({px:x,py:z})}
+if(pts.length>3000)pts.splice(0,5);
+ctx.strokeStyle=C.gold;ctx.lineWidth=0.8;ctx.beginPath();
+pts.forEach((p,i)=>{const sx=W/2+p.px*4,sy=H-p.py*5;
+ctx.globalAlpha=i/pts.length*0.5;
+if(i===0)ctx.moveTo(sx,sy);else ctx.lineTo(sx,sy)});ctx.stroke();
+// Current point glow
+if(pts.length>0){const last=pts[pts.length-1];const sx=W/2+last.px*4,sy=H-last.py*5;
+ctx.fillStyle=C.gold;ctx.globalAlpha=0.8;ctx.beginPath();ctx.arc(sx,sy,3,0,Math.PI*2);ctx.fill()}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 15. MYCELIUM NETWORK
+mycelium(ctx,W,H,C){const tips=[];const segs=[];
+tips.push({x:W/2,y:H/2,ang:0},{x:W/2,y:H/2,ang:Math.PI/2},{x:W/2,y:H/2,ang:Math.PI},{x:W/2,y:H/2,ang:-Math.PI/2});
+let t=0;(function d(){ctx.fillStyle=BG+'0.01)';ctx.fillRect(0,0,W,H);t++;
+tips.forEach(tip=>{const ox=tip.x,oy=tip.y;tip.ang+=(Math.random()-0.5)*0.3;
+tip.x+=Math.cos(tip.ang)*1.2;tip.y+=Math.sin(tip.ang)*1.2;
+if(tip.x<5||tip.x>W-5||tip.y<5||tip.y>H-5){tip.ang+=Math.PI;tip.x=Math.max(5,Math.min(W-5,tip.x));tip.y=Math.max(5,Math.min(H-5,tip.y))}
+segs.push({x1:ox,y1:oy,x2:tip.x,y2:tip.y,a:0.4});
+if(Math.random()<0.008&&tips.length<60)tips.push({x:tip.x,y:tip.y,ang:tip.ang+(Math.random()-0.5)*1.5})});
+// Fade old segments
+segs.forEach(s=>{ctx.strokeStyle=C.sage;ctx.globalAlpha=s.a;ctx.lineWidth=0.8;
+ctx.beginPath();ctx.moveTo(s.x1,s.y1);ctx.lineTo(s.x2,s.y2);ctx.stroke()});
+// Tip glow
+tips.forEach(tip=>{ctx.fillStyle=C.gold;ctx.globalAlpha=0.5;ctx.beginPath();ctx.arc(tip.x,tip.y,2,0,Math.PI*2);ctx.fill()});
+if(segs.length>5000)segs.splice(0,100);
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 16. CONWAY'S GAME OF LIFE
+conway(ctx,W,H,C){const cols=40,rows=30,sz=Math.min(W/cols,H/rows);
+let grid=Array.from({length:rows},()=>Array.from({length:cols},()=>Math.random()<0.35?1:0));
+function step(){const ng=grid.map(r=>[...r]);
+for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){let n=0;
+for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;
+const ny=(y+dy+rows)%rows,nx=(x+dx+cols)%cols;n+=grid[ny][nx]}
+if(grid[y][x]){ng[y][x]=n===2||n===3?1:0}else{ng[y][x]=n===3?1:0}}grid=ng}
+let t=0;(function d(){ctx.fillStyle=BG+'0.3)';ctx.fillRect(0,0,W,H);
+if(t%6===0)step();t++;
+const ox=(W-cols*sz)/2,oy=(H-rows*sz)/2;
+for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){if(grid[y][x]){
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.5;ctx.fillRect(ox+x*sz+1,oy+y*sz+1,sz-2,sz-2)}}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 17. ORBITAL MECHANICS
+orbits(ctx,W,H,C){let t=0;const bodies=[
+{r:50,s:0.015,sz:5,c:C.warm},{r:80,s:0.01,sz:3,c:C.sage},
+{r:115,s:0.007,sz:4,c:C.slate},{r:145,s:0.004,sz:2.5,c:C.gold}];
+const trails=bodies.map(()=>[]);
+(function d(){ctx.fillStyle=BG+'0.06)';ctx.fillRect(0,0,W,H);t+=1;
+const cx=W/2,cy=H/2;
+// Central body
+ctx.fillStyle=C.gold;ctx.globalAlpha=0.15;ctx.beginPath();ctx.arc(cx,cy,12,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=C.gold;ctx.globalAlpha=0.4;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,8,0,Math.PI*2);ctx.stroke();
+bodies.forEach((b,bi)=>{const x=cx+Math.cos(t*b.s)*b.r,y=cy+Math.sin(t*b.s)*b.r*0.5;
+trails[bi].push({x,y});if(trails[bi].length>80)trails[bi].shift();
+// Orbit path
+ctx.strokeStyle=b.c;ctx.globalAlpha=0.08;ctx.lineWidth=0.5;ctx.beginPath();ctx.ellipse(cx,cy,b.r,b.r*0.5,0,0,Math.PI*2);ctx.stroke();
+// Trail
+ctx.strokeStyle=b.c;ctx.lineWidth=1;ctx.beginPath();
+trails[bi].forEach((p,i)=>{ctx.globalAlpha=i/trails[bi].length*0.3;if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)});ctx.stroke();
+// Body
+ctx.fillStyle=b.c;ctx.globalAlpha=0.7;ctx.beginPath();ctx.arc(x,y,b.sz,0,Math.PI*2);ctx.fill()});
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 18. OSMOSIS / MEMBRANE
+membrane(ctx,W,H,C){const mols=[];for(let i=0;i<40;i++)mols.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*1.5,vy:(Math.random()-0.5)*1.5,
+r:2+Math.random()*2,c:Math.random()>0.5?C.sage:C.gold,side:0});
+let t=0;(function d(){ctx.fillStyle=BG+'0.12)';ctx.fillRect(0,0,W,H);t+=0.02;
+// Membrane (wavy horizontal line)
+const my=H/2;ctx.strokeStyle=C.slate;ctx.globalAlpha=0.3;ctx.lineWidth=3;ctx.beginPath();
+for(let x=0;x<W;x+=2){ctx.lineTo(x,my+Math.sin(x*0.05+t)*4)}ctx.stroke();
+// Membrane phospholipids
+for(let x=10;x<W;x+=12){const yy=my+Math.sin(x*0.05+t)*4;
+ctx.fillStyle=C.slate;ctx.globalAlpha=0.25;ctx.beginPath();ctx.arc(x,yy-4,2.5,0,Math.PI*2);ctx.fill();
+ctx.beginPath();ctx.arc(x,yy+4,2.5,0,Math.PI*2);ctx.fill()}
+// Molecules
+mols.forEach(m=>{m.x+=m.vx;m.y+=m.vy;
+// Membrane interaction
+if(Math.abs(m.y-my)<8){if(m.c===C.sage){m.vy*=0.95}else{m.vy*=0.7;if(Math.random()<0.005)m.vy=Math.sign(m.vy)*2}}
+if(m.x<0||m.x>W)m.vx*=-1;if(m.y<0||m.y>H)m.vy*=-1;
+m.vx*=0.999;m.vy*=0.999;m.vx+=(Math.random()-0.5)*0.1;m.vy+=(Math.random()-0.5)*0.1;
+ctx.fillStyle=m.c;ctx.globalAlpha=0.5;ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,Math.PI*2);ctx.fill()});
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 19. CORAL BRANCHING GROWTH
+coral(ctx,W,H,C){const branches=[];let growT=0;
+function addBranch(x,y,ang,gen){if(gen>7)return;branches.push({x,y,ang,gen,len:0,maxLen:15+Math.random()*15,grown:false,children:false})}
+addBranch(W/2,H*0.95,-Math.PI/2,0);addBranch(W*0.3,H*0.95,-Math.PI/2+0.2,0);addBranch(W*0.7,H*0.95,-Math.PI/2-0.2,0);
+(function d(){ctx.fillStyle=BG+'0.01)';ctx.fillRect(0,0,W,H);growT++;
+branches.forEach(b=>{if(b.len<b.maxLen)b.len+=0.3;else if(!b.children&&b.gen<7){b.children=true;
+const ex=b.x+Math.cos(b.ang)*b.len,ey=b.y+Math.sin(b.ang)*b.len;
+addBranch(ex,ey,b.ang-0.3-Math.random()*0.3,b.gen+1);
+addBranch(ex,ey,b.ang+0.3+Math.random()*0.3,b.gen+1);
+if(Math.random()>0.5)addBranch(ex,ey,b.ang+(Math.random()-0.5)*0.2,b.gen+1)}
+const ex=b.x+Math.cos(b.ang)*b.len,ey=b.y+Math.sin(b.ang)*b.len;
+const cols=[C.sage,C.gold,C.warm,C.slate];
+ctx.strokeStyle=cols[b.gen%4];ctx.globalAlpha=0.3-b.gen*0.02;ctx.lineWidth=Math.max(0.5,3-b.gen*0.3);
+ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke();
+if(b.gen>4){ctx.fillStyle=C.gold;ctx.globalAlpha=0.15;ctx.beginPath();ctx.arc(ex,ey,3-b.gen*0.2,0,Math.PI*2);ctx.fill()}});
+if(branches.length>800){ctx.fillStyle='#0a0a0e';ctx.fillRect(0,0,W,H);branches.length=0;
+addBranch(W/2,H*0.95,-Math.PI/2,0);addBranch(W*0.3,H*0.95,-Math.PI/2+0.2,0);addBranch(W*0.7,H*0.95,-Math.PI/2-0.2,0)}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 20. SPIRAL GALAXY
+galaxy(ctx,W,H,C){let t=0;const stars=[];const maxR=Math.min(W,H)*0.45;
+for(let i=0;i<700;i++){const arm=~~(Math.random()*3);const dist=Math.random()*maxR;
+const spread=dist*0.1;stars.push({dist,armOff:arm*2.094+Math.random()*0.3,spread:(Math.random()-0.5)*spread,
+sz:0.8+Math.random()*2.5,c:[C.gold,C.sage,C.slate,'#ffffff'][~~(Math.random()*4)]})}
+(function d(){ctx.fillStyle=BG+'0.12)';ctx.fillRect(0,0,W,H);t+=vSpeed(0.003);
+const cx=W/2,cy=H/2;
+// Core glow layers
+ctx.fillStyle=C.gold;ctx.globalAlpha=vAlpha(0.12);ctx.beginPath();ctx.arc(cx,cy,vScale(25),0,Math.PI*2);ctx.fill();
+ctx.globalAlpha=0.06;ctx.beginPath();ctx.arc(cx,cy,50,0,Math.PI*2);ctx.fill();
+ctx.globalAlpha=0.025;ctx.beginPath();ctx.arc(cx,cy,90,0,Math.PI*2);ctx.fill();
+stars.forEach(s=>{const ang=s.armOff+Math.log(s.dist+1)*0.8+t;
+const x=cx+Math.cos(ang)*(s.dist+s.spread);const y=cy+Math.sin(ang)*(s.dist+s.spread)*0.45;
+ctx.fillStyle=s.c;ctx.globalAlpha=0.4+Math.random()*0.4;
+ctx.beginPath();ctx.arc(x,y,s.sz,0,Math.PI*2);ctx.fill();
+if(s.sz>2){ctx.globalAlpha=0.1;ctx.beginPath();ctx.arc(x,y,s.sz+3,0,Math.PI*2);ctx.fill()}});
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 21. JELLYFISH LOCOMOTION
+jellyfish(ctx,W,H,C){let t=0;const jf=[
+{x:W*0.3,y:H*0.6,sz:30,ph:0,c:C.sage},{x:W*0.65,y:H*0.4,sz:25,ph:2,c:C.slate},{x:W*0.5,y:H*0.7,sz:20,ph:4,c:C.gold}];
+(function d(){ctx.fillStyle=BG+'0.1)';ctx.fillRect(0,0,W,H);t+=0.03;
+jf.forEach(j=>{j.y-=0.2+Math.sin(t+j.ph)*0.3;if(j.y<-50)j.y=H+50;
+const pulse=Math.sin(t*2+j.ph);const bellW=j.sz*(1+pulse*0.15);const bellH=j.sz*0.6*(1-pulse*0.1);
+// Bell
+ctx.fillStyle=j.c;ctx.globalAlpha=0.1;
+ctx.beginPath();ctx.ellipse(j.x,j.y,bellW,bellH,0,Math.PI,0);ctx.fill();
+ctx.strokeStyle=j.c;ctx.globalAlpha=0.4;ctx.lineWidth=1.5;
+ctx.beginPath();ctx.ellipse(j.x,j.y,bellW,bellH,0,Math.PI,0);ctx.stroke();
+// Tentacles
+for(let i=-3;i<=3;i++){ctx.strokeStyle=j.c;ctx.globalAlpha=0.2;ctx.lineWidth=0.8;ctx.beginPath();
+const tx=j.x+i*bellW*0.25;ctx.moveTo(tx,j.y);
+for(let s=0;s<5;s++){const sy=j.y+s*12+5;const sx=tx+Math.sin(t*3+j.ph+s+i)*4;ctx.lineTo(sx,sy)}ctx.stroke()}
+// Inner glow
+ctx.fillStyle=j.c;ctx.globalAlpha=0.06;ctx.beginPath();ctx.arc(j.x,j.y-bellH*0.3,bellW*0.5,0,Math.PI*2);ctx.fill()});
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 22. BIOLUMINESCENCE
+biolum(ctx,W,H,C){const orbs=[];for(let i=0;i<35;i++)orbs.push({x:Math.random()*W,y:Math.random()*H,
+r:8+Math.random()*22,phase:Math.random()*6.28,speed:0.02+Math.random()*0.03,
+vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4,c:[C.sage,C.slate,C.gold][~~(Math.random()*3)]});
+let t=0;(function d(){ctx.fillStyle=BG+'0.04)';ctx.fillRect(0,0,W,H);t+=vSpeed(0.02);
+const mv=1+micLevel*3;
+orbs.forEach(o=>{o.x+=o.vx*mv;o.y+=o.vy*mv;if(o.x<0||o.x>W)o.vx*=-1;if(o.y<0||o.y>H)o.vy*=-1;
+const glow=Math.max(0,Math.sin(t*o.speed*50+o.phase));const vr=vScale(o.r);
+// Wide outer glow
+const grad=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,vr*3);
+grad.addColorStop(0,o.c);grad.addColorStop(1,'transparent');
+ctx.fillStyle=grad;ctx.globalAlpha=vAlpha(glow*0.2);ctx.beginPath();ctx.arc(o.x,o.y,vr*3,0,Math.PI*2);ctx.fill();
+// Inner glow
+ctx.fillStyle=o.c;ctx.globalAlpha=vAlpha(glow*0.3);ctx.beginPath();ctx.arc(o.x,o.y,vr,0,Math.PI*2);ctx.fill();
+// Core
+ctx.fillStyle='#ffffff';ctx.globalAlpha=glow*0.6;ctx.beginPath();ctx.arc(o.x,o.y,vr*0.2,0,Math.PI*2);ctx.fill()});
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 23. MITOSIS — chromosomes separating
+mitosis(ctx,W,H,C){let t=0;const chroms=[];
+for(let i=0;i<8;i++)chroms.push({ang:Math.random()*6.28,dist:5+Math.random()*10,c:[C.sage,C.slate,C.warm,C.gold][i%4]});
+(function d(){ctx.fillStyle=BG+'0.08)';ctx.fillRect(0,0,W,H);t+=0.01;
+const phase=(Math.sin(t*0.5)+1)/2;// 0=together, 1=apart
+const cx=W/2,cy=H/2;const sep=phase*60;
+// Spindle fibers
+ctx.strokeStyle=C.slate;ctx.globalAlpha=0.1;ctx.lineWidth=0.5;
+for(let i=0;i<12;i++){const ang=i/12*Math.PI*2;
+ctx.beginPath();ctx.moveTo(cx-sep-30,cy);ctx.quadraticCurveTo(cx,cy+Math.sin(ang)*40,cx+sep+30,cy);ctx.stroke()}
+// Cell membrane
+const stretch=1+phase*0.4;ctx.strokeStyle=C.sage;ctx.globalAlpha=0.25;ctx.lineWidth=1.5;
+ctx.beginPath();ctx.ellipse(cx,cy,60*stretch,50/stretch,0,0,Math.PI*2);ctx.stroke();
+// Cleavage furrow
+if(phase>0.6){ctx.strokeStyle=C.warm;ctx.globalAlpha=(phase-0.6)*0.5;ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(cx,cy-50/stretch);ctx.lineTo(cx,cy+50/stretch);ctx.stroke()}
+// Chromosomes
+chroms.forEach((ch,i)=>{const side=i<4?-1:1;const targetX=cx+side*sep;
+const x=targetX+Math.cos(ch.ang+t)*ch.dist*(1-phase*0.5);
+const y=cy+Math.sin(ch.ang+t)*ch.dist*(1-phase*0.5);
+ctx.fillStyle=ch.c;ctx.globalAlpha=0.6;
+ctx.beginPath();ctx.ellipse(x,y,4,2,ch.ang+t,0,Math.PI*2);ctx.fill()});
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 24. PHYLLOTAXIS — sunflower seed pattern
+phyllotaxis(ctx,W,H,C){let count=0;const maxSeeds=500;let t=0;
+(function d(){ctx.fillStyle=BG+'0.02)';ctx.fillRect(0,0,W,H);t+=0.003;
+if(count<maxSeeds)count+=2;
+const cx=W/2,cy=H/2,golden=137.508*Math.PI/180;
+for(let i=0;i<count;i++){const r=Math.sqrt(i)*4;const th=i*golden+t;
+const x=cx+Math.cos(th)*r,y=cy+Math.sin(th)*r;
+if(x<-5||x>W+5||y<-5||y>H+5)continue;
+const cols=[C.gold,C.sage,C.warm];ctx.fillStyle=cols[i%3];
+ctx.globalAlpha=0.3+Math.sin(i*0.1+t*5)*0.15;
+const sz=1.5+r*0.008;ctx.beginPath();ctx.arc(x,y,sz,0,Math.PI*2);ctx.fill()}
+if(count>=maxSeeds){count=0;ctx.fillStyle='#0a0a0e';ctx.fillRect(0,0,W,H)}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 25. ELECTRIC DISCHARGE / LIGHTNING
+lightning(ctx,W,H,C){let t=0;let bolts=[];
+function makeBolt(x1,y1,x2,y2,gen){if(gen>5)return;const segs=[{x:x1,y:y1}];
+const dx=x2-x1,dy=y2-y1,steps=5+~~(Math.random()*5);
+for(let i=1;i<steps;i++){const f=i/steps;segs.push({x:x1+dx*f+(Math.random()-0.5)*30/gen,y:y1+dy*f+(Math.random()-0.5)*15/gen})}
+segs.push({x:x2,y:y2});bolts.push({segs,gen,a:1});
+if(Math.random()>0.5&&gen<4){const si=~~(segs.length/2);const s=segs[si];
+makeBolt(s.x,s.y,s.x+(Math.random()-0.5)*60,s.y+Math.random()*40,gen+1)}}
+(function d(){ctx.fillStyle=BG+'0.15)';ctx.fillRect(0,0,W,H);t++;
+if(t%60===0){bolts=[];makeBolt(W*0.3+Math.random()*W*0.4,0,W*0.2+Math.random()*W*0.6,H,1)}
+bolts.forEach(b=>{b.a*=0.97;ctx.strokeStyle=C.gold;ctx.globalAlpha=b.a*(0.4/b.gen);ctx.lineWidth=Math.max(0.5,3-b.gen);
+ctx.beginPath();b.segs.forEach((s,i)=>{if(i===0)ctx.moveTo(s.x,s.y);else ctx.lineTo(s.x,s.y)});ctx.stroke();
+// Glow
+ctx.strokeStyle=C.gold;ctx.globalAlpha=b.a*0.1/b.gen;ctx.lineWidth=6-b.gen;
+ctx.beginPath();b.segs.forEach((s,i)=>{if(i===0)ctx.moveTo(s.x,s.y);else ctx.lineTo(s.x,s.y)});ctx.stroke()});
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 26. DIFFUSION — ink drop expanding
+diffusion(ctx,W,H,C){const drops=[];let t=0;
+function addDrop(){drops.push({x:W*0.2+Math.random()*W*0.6,y:H*0.2+Math.random()*H*0.6,
+particles:[],c:[C.sage,C.gold,C.slate][~~(Math.random()*3)],born:t})}
+addDrop();
+(function d(){ctx.fillStyle=BG+'0.02)';ctx.fillRect(0,0,W,H);t++;
+if(t%120===0)addDrop();
+drops.forEach(dr=>{const age=t-dr.born;if(age<150&&age%2===0){
+for(let i=0;i<3;i++)dr.particles.push({x:dr.x,y:dr.y,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2,a:0.6})}
+dr.particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=0.99;p.vy*=0.99;
+p.vx+=(Math.random()-0.5)*0.2;p.vy+=(Math.random()-0.5)*0.2;p.a*=0.998;
+ctx.fillStyle=dr.c;ctx.globalAlpha=p.a;ctx.beginPath();ctx.arc(p.x,p.y,1.5,0,Math.PI*2);ctx.fill()})});
+drops.forEach(dr=>{dr.particles=dr.particles.filter(p=>p.a>0.05)});
+if(drops.length>5)drops.shift();
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 27. ELECTRON TRANSPORT CHAIN
+respchain(ctx,W,H,C){let t=0;const complexes=[
+{x:W*0.15,w:40,h:50,c:C.sage,label:'I'},{x:W*0.38,w:35,h:45,c:C.slate,label:'II'},
+{x:W*0.6,w:40,h:55,c:C.warm,label:'III'},{x:W*0.82,w:35,h:50,c:C.gold,label:'IV'}];
+const electrons=[];
+(function d(){ctx.fillStyle=BG+'0.12)';ctx.fillRect(0,0,W,H);t+=0.03;
+const cy=H*0.5;
+// Membrane
+ctx.fillStyle=C.slate;ctx.globalAlpha=0.05;ctx.fillRect(0,cy-30,W,60);
+ctx.strokeStyle=C.slate;ctx.globalAlpha=0.15;ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(0,cy-30);ctx.lineTo(W,cy-30);ctx.stroke();
+ctx.beginPath();ctx.moveTo(0,cy+30);ctx.lineTo(W,cy+30);ctx.stroke();
+// Complexes
+complexes.forEach(cx2=>{ctx.fillStyle=cx2.c;ctx.globalAlpha=0.15;
+const rx=cx2.x-cx2.w/2,ry=cy-cx2.h/2;
+ctx.fillRect(rx,ry,cx2.w,cx2.h);ctx.strokeStyle=cx2.c;ctx.globalAlpha=0.4;ctx.lineWidth=1;ctx.strokeRect(rx,ry,cx2.w,cx2.h)});
+// Spawn electrons
+if(Math.random()<0.04)electrons.push({x:0,y:cy,c:C.gold,a:0.8});
+electrons.forEach(e=>{e.x+=1.5;e.y=cy+Math.sin(e.x*0.05+t)*15;
+ctx.fillStyle=e.c;ctx.globalAlpha=e.a;ctx.beginPath();ctx.arc(e.x,e.y,3,0,Math.PI*2);ctx.fill();
+ctx.globalAlpha=e.a*0.3;ctx.beginPath();ctx.arc(e.x,e.y,7,0,Math.PI*2);ctx.fill()});
+for(let i=electrons.length-1;i>=0;i--)if(electrons[i].x>W+10)electrons.splice(i,1);
+// H+ ions floating above
+for(let i=0;i<8;i++){const hx=W*0.1+i*W*0.1+Math.sin(t+i)*10;const hy=cy-50+Math.cos(t*2+i)*8;
+ctx.fillStyle=C.warm;ctx.globalAlpha=0.2;ctx.beginPath();ctx.arc(hx,hy,2,0,Math.PI*2);ctx.fill()}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 28. FLAGELLAR MOTOR
+flagella(ctx,W,H,C){let t=0;(function d(){ctx.fillStyle=BG+'0.15)';ctx.fillRect(0,0,W,H);t+=0.05;
+const cx=W/2,cy=H*0.35;
+// Cell body
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.08;ctx.beginPath();ctx.ellipse(cx,cy,50,30,0,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=C.sage;ctx.globalAlpha=0.3;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(cx,cy,50,30,0,0,Math.PI*2);ctx.stroke();
+// Motor base (rings)
+for(let i=3;i>0;i--){ctx.strokeStyle=C.gold;ctx.globalAlpha=0.2+i*0.05;ctx.lineWidth=1;
+ctx.beginPath();ctx.ellipse(cx,cy+30,5+i*3,2+i,t*2,0,Math.PI*2);ctx.stroke()}
+// Flagellum (wavy)
+ctx.strokeStyle=C.gold;ctx.globalAlpha=0.4;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(cx,cy+35);
+for(let i=0;i<80;i++){const fy=cy+35+i*2;const fx=cx+Math.sin(i*0.15-t*3)*20*(i/80);ctx.lineTo(fx,fy)}ctx.stroke();
+// Hook detail
+ctx.strokeStyle=C.warm;ctx.globalAlpha=0.3;ctx.lineWidth=2;
+ctx.beginPath();ctx.arc(cx,cy+32,5,0,Math.PI*2);ctx.stroke();
+// Rotation indicator
+for(let i=0;i<6;i++){const a=t*3+i*Math.PI/3;const rx=cx+Math.cos(a)*8,ry=cy+30+Math.sin(a)*3;
+ctx.fillStyle=C.gold;ctx.globalAlpha=0.3;ctx.beginPath();ctx.arc(rx,ry,1.5,0,Math.PI*2);ctx.fill()}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 29. ENZYME CATALYSIS (lock & key)
+enzyme(ctx,W,H,C){let t=0;(function d(){ctx.fillStyle=BG+'0.12)';ctx.fillRect(0,0,W,H);t+=0.015;
+const cx=W/2,cy=H/2;const cycle=t%6.28;const phase=cycle/6.28;// 0-1 cycle
+// Enzyme (large blob with active site notch)
+const eAng=Math.sin(t)*0.1;ctx.save();ctx.translate(cx,cy);ctx.rotate(eAng);
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.1;ctx.beginPath();
+ctx.arc(0,0,40,0.3,5.98);ctx.lineTo(Math.cos(0.3)*25,Math.sin(0.3)*25);
+ctx.arc(0,0,25,0.3,-0.3,true);ctx.lineTo(Math.cos(5.98)*40,Math.sin(5.98)*40);ctx.fill();
+ctx.strokeStyle=C.sage;ctx.globalAlpha=0.4;ctx.lineWidth=1.5;ctx.beginPath();
+ctx.arc(0,0,40,0.3,5.98);ctx.lineTo(Math.cos(0.3)*25,Math.sin(0.3)*25);
+ctx.arc(0,0,25,0.3,-0.3,true);ctx.closePath();ctx.stroke();ctx.restore();
+// Substrate (small shape approaching)
+const approach=phase<0.3?phase/0.3:phase<0.7?1:1-(phase-0.7)/0.3;
+const subDist=60-approach*28;const subX=cx+subDist,subY=cy;
+ctx.fillStyle=C.gold;ctx.globalAlpha=0.15+approach*0.2;
+ctx.beginPath();ctx.arc(subX,subY,10,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=C.gold;ctx.globalAlpha=0.5;ctx.lineWidth=1;
+ctx.beginPath();ctx.arc(subX,subY,10,0,Math.PI*2);ctx.stroke();
+// Products (after catalysis)
+if(phase>0.7){const spread=(phase-0.7)/0.3;
+ctx.fillStyle=C.warm;ctx.globalAlpha=0.4*(1-spread);
+ctx.beginPath();ctx.arc(cx+40+spread*40,cy-spread*20,5,0,Math.PI*2);ctx.fill();
+ctx.beginPath();ctx.arc(cx+40+spread*30,cy+spread*25,4,0,Math.PI*2);ctx.fill()}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 30. FLUID VORTEX
+vortex(ctx,W,H,C){const pts=[];for(let i=0;i<300;i++)pts.push({
+x:W/2+(Math.random()-0.5)*W*0.8,y:H/2+(Math.random()-0.5)*H*0.8,
+c:[C.gold,C.sage,C.slate,C.warm][~~(Math.random()*4)],sz:1+Math.random()*2});
+let t=0;(function d(){ctx.fillStyle=BG+'0.04)';ctx.fillRect(0,0,W,H);t+=vSpeed(0.01);
+const cx=W/2,cy=H/2;const vf=1+micLevel*2.5;
+pts.forEach(p=>{const dx=p.x-cx,dy=p.y-cy,dist=Math.sqrt(dx*dx+dy*dy)+0.1;
+const force=300/(dist+30);const ang=Math.atan2(dy,dx)+Math.PI/2;
+p.x+=Math.cos(ang)*force*0.6*vf;p.y+=Math.sin(ang)*force*0.6*vf;
+p.x+=(cx-p.x)*0.001;p.y+=(cy-p.y)*0.001;
+if(dist>Math.min(W,H)*0.45){p.x=cx+(Math.random()-0.5)*W*0.5;p.y=cy+(Math.random()-0.5)*H*0.5}
+ctx.fillStyle=p.c;ctx.globalAlpha=0.08;ctx.beginPath();ctx.arc(p.x,p.y,p.sz+4,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=p.c;ctx.globalAlpha=0.45+0.3*(1-dist/200);
+ctx.beginPath();ctx.arc(p.x,p.y,p.sz,0,Math.PI*2);ctx.fill()});
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 31. DNA REPLICATION FORK — helicase unzipping, polymerase building new strands
+dnarepl(ctx,W,H,C){let t=0;(function d(){ctx.fillStyle=BG+'0.1)';ctx.fillRect(0,0,W,H);t+=0.015;
+const cx=W/2,forkY=H*0.35+Math.sin(t)*10;
+// Parent double strand coming from top
+for(let y=0;y<forkY;y+=8){const wobble=Math.sin(y*0.05+t)*12;
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.6;ctx.beginPath();ctx.arc(cx-wobble,y,3.5,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=C.gold;ctx.globalAlpha=0.6;ctx.beginPath();ctx.arc(cx+wobble,y,3.5,0,Math.PI*2);ctx.fill();
+// Rungs
+ctx.strokeStyle=C.slate;ctx.globalAlpha=0.2;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(cx-wobble,y);ctx.lineTo(cx+wobble,y);ctx.stroke()}
+// Helicase at fork point (glowing ring)
+ctx.fillStyle=C.warm;ctx.globalAlpha=0.12;ctx.beginPath();ctx.arc(cx,forkY,18,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=C.warm;ctx.globalAlpha=0.6;ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,forkY,12,t*3,t*3+4);ctx.stroke();
+ctx.globalAlpha=0.3;ctx.beginPath();ctx.arc(cx,forkY,12,t*3+Math.PI,t*3+Math.PI+2);ctx.stroke();
+// Leading strand (left, continuous)
+const spreadAng=0.4+Math.sin(t*0.5)*0.05;
+for(let i=0;i<20;i++){const prog=i/20;const y=forkY+prog*(H-forkY)*0.7;const x=cx-Math.sin(spreadAng)*prog*80;
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.5+prog*0.2;ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();
+// New complementary bases being added
+if(i<~~(((t*3)%20))){ctx.fillStyle=C.slate;ctx.globalAlpha=0.4;ctx.beginPath();ctx.arc(x+8,y,2.5,0,Math.PI*2);ctx.fill()}}
+// Lagging strand (right, Okazaki fragments)
+for(let f=0;f<4;f++){const fStart=forkY+(f*0.18+0.05)*(H-forkY)*0.7;const fLen=30+Math.sin(t+f)*5;
+const fragAlpha=(Math.sin(t*2+f*1.5)+1)/2;
+for(let i=0;i<8;i++){const prog=i/8;const y=fStart+prog*fLen;const x=cx+Math.sin(spreadAng)*(y-forkY)/(H-forkY)*80*0.7+5;
+ctx.fillStyle=C.gold;ctx.globalAlpha=fragAlpha*0.5;ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill()}}
+// Polymerase blobs
+const leadY=forkY+((t*3)%20)/20*(H-forkY)*0.7;const leadX=cx-Math.sin(spreadAng)*((t*3)%20)/20*80;
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.2;ctx.beginPath();ctx.arc(leadX,leadY,8,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=C.sage;ctx.globalAlpha=0.5;ctx.lineWidth=2;ctx.beginPath();ctx.arc(leadX,leadY,8,0,Math.PI*2);ctx.stroke();
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 32. PCR — thermal cycling with exponential amplification
+pcr(ctx,W,H,C){let t=0;let strands=2;let phase=0;// 0=denature,1=anneal,2=extend
+const phaseLen=[80,60,100];const phaseNames=['DENATURE 95°C','ANNEAL 55°C','EXTEND 72°C'];
+const phaseCols=[C.warm,C.slate,C.sage];let pTimer=0;let cycle=1;
+const dnaSegs=[];for(let i=0;i<2;i++)dnaSegs.push({x:W/2,y:H*0.3+i*40,split:0,copies:[]});
+(function d(){ctx.fillStyle=BG+'0.12)';ctx.fillRect(0,0,W,H);t++;pTimer++;
+if(pTimer>=phaseLen[phase]){pTimer=0;phase=(phase+1)%3;if(phase===0){cycle++;strands=Math.min(strands*2,64)}}
+// Phase indicator bar at top
+ctx.fillStyle=phaseCols[phase];ctx.globalAlpha=0.15;ctx.fillRect(0,0,W,6);
+ctx.globalAlpha=0.7;ctx.fillRect(0,0,W*(pTimer/phaseLen[phase]),6);
+// Phase label
+ctx.font='bold 10px "JetBrains Mono"';ctx.fillStyle=phaseCols[phase];ctx.globalAlpha=0.6;ctx.textAlign='center';
+ctx.fillText(phaseNames[phase],W/2,22);
+// Cycle counter
+ctx.fillText('Cycle '+cycle+' — '+strands+' copies',W/2,38);
+// Draw DNA strands
+const rows=Math.min(strands,16);const spacing=Math.min(30,(H-60)/rows);
+for(let i=0;i<rows;i++){const y=55+i*spacing;const cx2=W/2;
+const sep=phase===0?pTimer/phaseLen[0]*20:phase===1?20-pTimer/phaseLen[1]*10:10;
+// Top strand
+ctx.strokeStyle=C.sage;ctx.globalAlpha=0.5;ctx.lineWidth=2;ctx.beginPath();
+for(let x=W*0.15;x<W*0.85;x+=3){ctx.lineTo(x,y-sep/2+Math.sin(x*0.08+t*0.03)*2)}ctx.stroke();
+// Bottom strand
+ctx.strokeStyle=C.gold;ctx.globalAlpha=0.5;ctx.beginPath();
+for(let x=W*0.15;x<W*0.85;x+=3){ctx.lineTo(x,y+sep/2+Math.sin(x*0.08+t*0.03)*2)}ctx.stroke();
+// Rungs (only when annealed/extending)
+if(phase!==0){for(let x=W*0.2;x<W*0.8;x+=12){ctx.strokeStyle=C.slate;ctx.globalAlpha=0.15;ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(x,y-sep/2);ctx.lineTo(x,y+sep/2);ctx.stroke()}}
+// Primers (anneal phase)
+if(phase===1){const pLen=pTimer/phaseLen[1];
+ctx.fillStyle=C.warm;ctx.globalAlpha=pLen*0.7;
+ctx.fillRect(W*0.15,y-sep/2-2,25,4);ctx.fillRect(W*0.85-25,y+sep/2-2,25,4)}
+// Extension (green glow moving)
+if(phase===2){const prog=pTimer/phaseLen[2];
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.15;ctx.fillRect(W*0.15,y-sep/2-4,(W*0.7)*prog,sep+8)}}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 33. RNA TRANSCRIPTION — RNA polymerase reading DNA, building mRNA
+transcription(ctx,W,H,C){let t=0;const mRNA=[];
+(function d(){ctx.fillStyle=BG+'0.1)';ctx.fillRect(0,0,W,H);t+=0.012;
+const cx=W/2,cy=H*0.4;
+// DNA template (horizontal double strand)
+const dnaY=cy;
+for(let x=20;x<W-20;x+=3){const wobble=Math.sin(x*0.04+t)*3;
+ctx.fillStyle=C.slate;ctx.globalAlpha=0.5;ctx.beginPath();ctx.arc(x,dnaY-8+wobble,2,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.5;ctx.beginPath();ctx.arc(x,dnaY+8+wobble,2,0,Math.PI*2);ctx.fill()}
+// Rungs
+for(let x=25;x<W-25;x+=10){ctx.strokeStyle=C.slate;ctx.globalAlpha=0.12;ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(x,dnaY-8+Math.sin(x*0.04+t)*3);ctx.lineTo(x,dnaY+8+Math.sin(x*0.04+t)*3);ctx.stroke()}
+// Transcription bubble (open DNA)
+const bubbleX=W*0.2+(t*20)%W*0.6;const bubbleW=50;
+ctx.fillStyle='#0a0a0e';ctx.globalAlpha=0.8;
+ctx.beginPath();ctx.ellipse(bubbleX,dnaY,bubbleW/2,18,0,0,Math.PI*2);ctx.fill();
+// Separated strands in bubble
+for(let x=bubbleX-bubbleW/2;x<bubbleX+bubbleW/2;x+=4){const bProg=(x-(bubbleX-bubbleW/2))/bubbleW;const sep=Math.sin(bProg*Math.PI)*14;
+ctx.fillStyle=C.slate;ctx.globalAlpha=0.5;ctx.beginPath();ctx.arc(x,dnaY-sep,1.5,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.5;ctx.beginPath();ctx.arc(x,dnaY+sep,1.5,0,Math.PI*2);ctx.fill()}
+// RNA Polymerase (at bubble center)
+ctx.fillStyle=C.warm;ctx.globalAlpha=0.15;ctx.beginPath();ctx.arc(bubbleX,dnaY,14,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=C.warm;ctx.globalAlpha=0.6;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(bubbleX,dnaY,10,0,Math.PI*2);ctx.stroke();
+// mRNA strand being built (emerging down from bubble)
+const mLen=Math.min(40,~~(t*8)%50);
+ctx.strokeStyle=C.gold;ctx.globalAlpha=0.6;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(bubbleX,dnaY+14);
+for(let i=0;i<mLen;i++){const mx=bubbleX+Math.sin(i*0.3+t)*8+i*1.5;const my=dnaY+18+i*4;ctx.lineTo(mx,my)}ctx.stroke();
+// mRNA nucleotide dots
+for(let i=0;i<mLen;i++){const mx=bubbleX+Math.sin(i*0.3+t)*8+i*1.5;const my=dnaY+18+i*4;
+ctx.fillStyle=C.gold;ctx.globalAlpha=0.7;ctx.beginPath();ctx.arc(mx,my,2,0,Math.PI*2);ctx.fill()}
+// 5' cap on mRNA
+if(mLen>3){ctx.fillStyle=C.warm;ctx.globalAlpha=0.5;const capX=bubbleX+Math.sin(t)*8;
+ctx.beginPath();ctx.arc(capX,dnaY+22,4,0,Math.PI*2);ctx.fill()}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 34. PROTEIN SYNTHESIS (Translation) — ribosome reading mRNA, building amino acid chain
+translation(ctx,W,H,C){let t=0;const aminoAcids=[];const aaCols=[C.sage,C.gold,C.warm,C.slate,'#a06b6b'];
+(function d(){ctx.fillStyle=BG+'0.1)';ctx.fillRect(0,0,W,H);t+=0.015;
+// mRNA strand (horizontal, center)
+const mY=H*0.4;
+ctx.strokeStyle=C.gold;ctx.globalAlpha=0.5;ctx.lineWidth=3;ctx.beginPath();
+for(let x=0;x<W;x+=2){ctx.lineTo(x,mY+Math.sin(x*0.03+t)*3)}ctx.stroke();
+// Codons (triplet markers)
+for(let x=20;x<W-20;x+=24){ctx.fillStyle=C.gold;ctx.globalAlpha=0.15;ctx.fillRect(x,mY-4,20,8)}
+// Ribosome (large + small subunit)
+const ribX=(t*15)%W;
+// Large subunit (bottom)
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.1;ctx.beginPath();ctx.ellipse(ribX,mY+16,28,20,0,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=C.sage;ctx.globalAlpha=0.5;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(ribX,mY+16,28,20,0,0,Math.PI*2);ctx.stroke();
+// Small subunit (top)
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.08;ctx.beginPath();ctx.ellipse(ribX,mY-12,22,14,0,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=C.sage;ctx.globalAlpha=0.4;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(ribX,mY-12,22,14,0,0,Math.PI*2);ctx.stroke();
+// tRNA entering (A site)
+const tRNAphase=(t*3)%6.28;const tY=mY-30-Math.abs(Math.sin(tRNAphase))*20;
+ctx.strokeStyle=C.warm;ctx.globalAlpha=0.5;ctx.lineWidth=2;ctx.beginPath();
+ctx.moveTo(ribX+10,mY-5);ctx.quadraticCurveTo(ribX+15,tY,ribX+5,tY-10);ctx.stroke();
+ctx.fillStyle=C.warm;ctx.globalAlpha=0.6;ctx.beginPath();ctx.arc(ribX+5,tY-10,4,0,Math.PI*2);ctx.fill();
+// Polypeptide chain emerging
+const chainLen=Math.min(25,~~(t*2)%30);
+for(let i=0;i<chainLen;i++){const angle=-Math.PI/2+i*0.25+Math.sin(t+i*0.5)*0.15;
+const px=ribX-30-i*6+Math.sin(i*0.8+t)*4;const py=mY+20+i*3+Math.cos(i*0.6+t)*3;
+ctx.fillStyle=aaCols[i%5];ctx.globalAlpha=0.12;ctx.beginPath();ctx.arc(px,py,8,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=aaCols[i%5];ctx.globalAlpha=0.65;ctx.beginPath();ctx.arc(px,py,5,0,Math.PI*2);ctx.fill();
+// Peptide bond line
+if(i>0){const ppx=ribX-30-(i-1)*6+Math.sin((i-1)*0.8+t)*4;const ppy=mY+20+(i-1)*3+Math.cos((i-1)*0.6+t)*3;
+ctx.strokeStyle=aaCols[i%5];ctx.globalAlpha=0.3;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(ppx,ppy);ctx.lineTo(px,py);ctx.stroke()}}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 35. mRNA SPLICING — introns being cut out, exons joined
+splicing(ctx,W,H,C){let t=0;(function d(){ctx.fillStyle=BG+'0.1)';ctx.fillRect(0,0,W,H);t+=0.01;
+const cy=H*0.3;
+// Pre-mRNA strand with exons and introns
+const regions=[
+  {start:0.05,end:0.18,type:'exon',c:C.sage},{start:0.18,end:0.35,type:'intron',c:C.slate},
+  {start:0.35,end:0.5,type:'exon',c:C.gold},{start:0.5,end:0.68,type:'intron',c:C.slate},
+  {start:0.68,end:0.82,type:'exon',c:C.warm},{start:0.82,end:0.95,type:'intron',c:C.slate}];
+// Label
+ctx.font='bold 9px "JetBrains Mono"';ctx.textAlign='center';ctx.fillStyle=C.gold;ctx.globalAlpha=0.5;
+ctx.fillText('pre-mRNA',W/2,cy-18);
+// Draw pre-mRNA
+regions.forEach(r=>{const x1=r.start*W,x2=r.end*W;
+ctx.fillStyle=r.c;ctx.globalAlpha=r.type==='exon'?0.3:0.08;ctx.fillRect(x1,cy-6,x2-x1,12);
+ctx.strokeStyle=r.c;ctx.globalAlpha=r.type==='exon'?0.7:0.3;ctx.lineWidth=2;ctx.strokeRect(x1,cy-6,x2-x1,12)});
+// Spliceosome (animated lariat formation on introns)
+const splicePhase=(t*2)%6.28;const progress=(Math.sin(splicePhase)+1)/2;
+regions.filter(r=>r.type==='intron').forEach((r,idx)=>{const midX=(r.start+r.end)/2*W;const loopH=progress*50;
+ctx.strokeStyle=C.slate;ctx.globalAlpha=0.3*progress;ctx.lineWidth=1.5;ctx.beginPath();
+ctx.moveTo(r.start*W,cy);ctx.quadraticCurveTo(midX,cy-loopH,r.end*W,cy);ctx.stroke();
+// Lariat circle
+if(progress>0.5){ctx.strokeStyle=C.warm;ctx.globalAlpha=(progress-0.5)*0.8;ctx.lineWidth=1.5;
+ctx.beginPath();ctx.arc(midX,cy-loopH+8,6,0,Math.PI*2);ctx.stroke()}});
+// Mature mRNA (below, exons joined)
+const matureY=H*0.65;ctx.fillStyle=C.gold;ctx.globalAlpha=0.4;ctx.fillText('mature mRNA',W/2,matureY-18);
+const exons=regions.filter(r=>r.type==='exon');const totalExonW=exons.reduce((s,r)=>(r.end-r.start)*W+s,0);
+const mStart=(W-totalExonW)/2;let mX=mStart;
+exons.forEach((r,i)=>{const w=(r.end-r.start)*W;const fadeIn=Math.min(1,progress*2);
+ctx.fillStyle=r.c;ctx.globalAlpha=fadeIn*0.35;ctx.fillRect(mX,matureY-6,w,12);
+ctx.strokeStyle=r.c;ctx.globalAlpha=fadeIn*0.8;ctx.lineWidth=2.5;ctx.strokeRect(mX,matureY-6,w,12);
+// Join lines
+if(i>0){ctx.strokeStyle=C.gold;ctx.globalAlpha=fadeIn*0.4;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(mX,matureY);ctx.lineTo(mX-2,matureY);ctx.stroke()}
+mX+=w});
+// 5' cap and poly-A tail
+ctx.fillStyle=C.warm;ctx.globalAlpha=progress*0.6;ctx.beginPath();ctx.arc(mStart-8,matureY,5,0,Math.PI*2);ctx.fill();
+for(let i=0;i<6;i++){ctx.fillStyle=C.sage;ctx.globalAlpha=progress*0.4;ctx.beginPath();ctx.arc(mX+8+i*6,matureY,2.5,0,Math.PI*2);ctx.fill()}
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 36. GEL ELECTROPHORESIS — bands migrating through gel
+gelelectro(ctx,W,H,C){let t=0;const lanes=[
+  {bands:[0.15,0.3,0.55,0.72],c:C.sage},{bands:[0.2,0.4,0.65],c:C.gold},
+  {bands:[0.12,0.25,0.45,0.6,0.8],c:C.slate},{bands:[0.18,0.35,0.5,0.7],c:C.warm},
+  {bands:[0.1,0.22,0.38,0.55,0.75,0.88],c:C.sage}];
+(function d(){ctx.fillStyle=BG+'0.12)';ctx.fillRect(0,0,W,H);t+=0.003;
+const migration=Math.min(1,(t*2)%1.3);
+// Gel background
+ctx.fillStyle='rgba(100,130,180,0.04)';ctx.fillRect(W*0.08,H*0.05,W*0.84,H*0.9);
+ctx.strokeStyle=C.slate;ctx.globalAlpha=0.15;ctx.lineWidth=1;ctx.strokeRect(W*0.08,H*0.05,W*0.84,H*0.9);
+// Wells at top
+const laneW=W*0.84/lanes.length;
+lanes.forEach((lane,li)=>{const lx=W*0.08+li*laneW+laneW/2;
+ctx.fillStyle=C.slate;ctx.globalAlpha=0.2;ctx.fillRect(lx-laneW*0.35,H*0.06,laneW*0.7,8);
+// Bands migrating
+lane.bands.forEach((pos,bi)=>{const targetY=H*0.1+pos*H*0.8;const currentY=H*0.08+migration*(targetY-H*0.08);
+const bandW=laneW*0.6;const intensity=0.3+0.4*(1-pos);// smaller = brighter
+ctx.fillStyle=lane.c;ctx.globalAlpha=intensity*migration;
+ctx.fillRect(lx-bandW/2,currentY-2,bandW,5);
+// Glow
+ctx.globalAlpha=intensity*migration*0.15;
+ctx.fillRect(lx-bandW/2-3,currentY-5,bandW+6,11)})});
+// Size markers on left
+const markers=['1000bp','750bp','500bp','250bp','100bp'];
+ctx.font='7px "JetBrains Mono"';ctx.textAlign='right';ctx.fillStyle=C.slate;
+markers.forEach((m,i)=>{const y=H*0.15+i*H*0.18;ctx.globalAlpha=0.3;ctx.fillText(m,W*0.07,y)});
+// + and - electrodes
+ctx.font='bold 11px "JetBrains Mono"';ctx.textAlign='center';
+ctx.fillStyle=C.warm;ctx.globalAlpha=0.5;ctx.fillText('(−)',W/2,H*0.03);
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.5;ctx.fillText('(+)',W/2,H*0.98);
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 37. PLASMID CLONING — circular DNA with insert
+plasmid(ctx,W,H,C){let t=0;(function d(){ctx.fillStyle=BG+'0.1)';ctx.fillRect(0,0,W,H);t+=0.008;
+const cx=W/2,cy=H*0.45,r=Math.min(W,H)*0.28;
+// Plasmid backbone (circle)
+ctx.strokeStyle=C.sage;ctx.globalAlpha=0.5;ctx.lineWidth=4;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+// Glow
+ctx.strokeStyle=C.sage;ctx.globalAlpha=0.08;ctx.lineWidth=12;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+// Gene insert (highlighted arc)
+const insertStart=t*0.5;const insertLen=0.8;
+ctx.strokeStyle=C.gold;ctx.globalAlpha=0.7;ctx.lineWidth=5;ctx.beginPath();ctx.arc(cx,cy,r,insertStart,insertStart+insertLen);ctx.stroke();
+ctx.strokeStyle=C.gold;ctx.globalAlpha=0.12;ctx.lineWidth=14;ctx.beginPath();ctx.arc(cx,cy,r,insertStart,insertStart+insertLen);ctx.stroke();
+// Origin of replication marker
+const oriAng=insertStart+insertLen+1;
+ctx.fillStyle=C.warm;ctx.globalAlpha=0.6;ctx.beginPath();ctx.arc(cx+Math.cos(oriAng)*r,cy+Math.sin(oriAng)*r,5,0,Math.PI*2);ctx.fill();
+// Antibiotic resistance gene
+const abAng=insertStart+insertLen+2.5;
+ctx.fillStyle=C.slate;ctx.globalAlpha=0.6;
+const abStart=abAng-0.3,abEnd=abAng+0.3;
+ctx.lineWidth=5;ctx.strokeStyle=C.slate;ctx.beginPath();ctx.arc(cx,cy,r,abStart,abEnd);ctx.stroke();
+// Restriction sites (small cuts)
+[insertStart-0.05,insertStart+insertLen+0.05].forEach(a=>{const rx=cx+Math.cos(a)*r,ry=cy+Math.sin(a)*r;
+ctx.strokeStyle=C.warm;ctx.globalAlpha=0.6+Math.sin(t*5)*0.3;ctx.lineWidth=2;
+ctx.beginPath();ctx.moveTo(rx-5,ry-5);ctx.lineTo(rx+5,ry+5);ctx.stroke();
+ctx.beginPath();ctx.moveTo(rx+5,ry-5);ctx.lineTo(rx-5,ry+5);ctx.stroke()});
+// Labels
+ctx.font='bold 8px "JetBrains Mono"';ctx.textAlign='center';ctx.globalAlpha=0.4;
+ctx.fillStyle=C.gold;const labAng=insertStart+insertLen/2;
+ctx.fillText('INSERT',cx+Math.cos(labAng)*(r+16),cy+Math.sin(labAng)*(r+16));
+ctx.fillStyle=C.warm;ctx.fillText('ORI',cx+Math.cos(oriAng)*(r+16),cy+Math.sin(oriAng)*(r+16));
+ctx.fillStyle=C.slate;ctx.fillText('AmpR',cx+Math.cos(abAng)*(r+16),cy+Math.sin(abAng)*(r+16));
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+// 38. CRISPR-Cas9 EDITING — guide RNA finding target, Cas9 cutting
+crispr(ctx,W,H,C){let t=0;(function d(){ctx.fillStyle=BG+'0.1)';ctx.fillRect(0,0,W,H);t+=0.012;
+const cy=H*0.4;
+// DNA double strand
+for(let x=10;x<W-10;x+=3){const wobble=Math.sin(x*0.04+t*0.5)*3;
+ctx.fillStyle=C.sage;ctx.globalAlpha=0.45;ctx.beginPath();ctx.arc(x,cy-7+wobble,2,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=C.slate;ctx.globalAlpha=0.45;ctx.beginPath();ctx.arc(x,cy+7+wobble,2,0,Math.PI*2);ctx.fill()}
+// Rungs
+for(let x=15;x<W-15;x+=10){ctx.strokeStyle=C.slate;ctx.globalAlpha=0.1;ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(x,cy-7+Math.sin(x*0.04+t*0.5)*3);ctx.lineTo(x,cy+7+Math.sin(x*0.04+t*0.5)*3);ctx.stroke()}
+// Target site (PAM + target) — highlighted region
+const targetX=W*0.45+Math.sin(t*0.3)*10;const targetW=50;
+ctx.fillStyle=C.gold;ctx.globalAlpha=0.1+Math.sin(t*3)*0.05;ctx.fillRect(targetX-targetW/2,cy-14,targetW,28);
+// PAM site
+ctx.fillStyle=C.warm;ctx.globalAlpha=0.35;ctx.fillRect(targetX+targetW/2-8,cy-14,10,28);
+// Cas9 protein approaching and binding
+const cas9Phase=(Math.sin(t*0.8)+1)/2;const cas9Y=cy-20*cas9Phase-5;
+ctx.fillStyle=C.warm;ctx.globalAlpha=0.1;ctx.beginPath();ctx.ellipse(targetX,cas9Y,30,18,0,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=C.warm;ctx.globalAlpha=0.5;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(targetX,cas9Y,24,14,0,0,Math.PI*2);ctx.stroke();
+// Guide RNA (curved line coming into Cas9)
+ctx.strokeStyle=C.gold;ctx.globalAlpha=0.55;ctx.lineWidth=2;ctx.beginPath();
+ctx.moveTo(targetX-30,cas9Y-30);
+ctx.quadraticCurveTo(targetX-15,cas9Y-20,targetX,cas9Y);ctx.stroke();
+// gRNA handle (hairpin loop)
+ctx.strokeStyle=C.gold;ctx.globalAlpha=0.35;ctx.lineWidth=1.5;ctx.beginPath();
+ctx.moveTo(targetX-30,cas9Y-30);ctx.quadraticCurveTo(targetX-50,cas9Y-50,targetX-35,cas9Y-55);
+ctx.quadraticCurveTo(targetX-20,cas9Y-60,targetX-25,cas9Y-40);ctx.stroke();
+// Cut indicators (scissors animation)
+if(cas9Phase>0.7){const cutAlpha=(cas9Phase-0.7)/0.3;
+ctx.strokeStyle=C.warm;ctx.globalAlpha=cutAlpha*0.8;ctx.lineWidth=2;
+// Cut on top strand
+ctx.beginPath();ctx.moveTo(targetX-3,cy-7);ctx.lineTo(targetX-3,cy-16);ctx.stroke();
+// Cut on bottom strand (offset — sticky ends)
+ctx.beginPath();ctx.moveTo(targetX+5,cy+7);ctx.lineTo(targetX+5,cy+16);ctx.stroke();
+// Glow at cuts
+ctx.fillStyle=C.warm;ctx.globalAlpha=cutAlpha*0.3;
+ctx.beginPath();ctx.arc(targetX-3,cy-7,6,0,Math.PI*2);ctx.fill();
+ctx.beginPath();ctx.arc(targetX+5,cy+7,6,0,Math.PI*2);ctx.fill()}
+// Label
+ctx.font='bold 8px "JetBrains Mono"';ctx.textAlign='center';ctx.fillStyle=C.warm;ctx.globalAlpha=0.35;
+ctx.fillText('Cas9',targetX,cas9Y+4);
+ctx.fillStyle=C.gold;ctx.fillText('gRNA',targetX-35,cas9Y-35);
+ctx.globalAlpha=1;vizRAF=requestAnimationFrame(d)})()},
+
+}; // end VIZ_FNS
+
+// ============================================================
+// ENGINE
+// ============================================================
+const MODES=['quiz','fact','news','thisorthat','spotlight','outbreak','breakthrough','mythbuster'];
+let lastMode=null;
+let modeQueue=[];
+let quizTimer=null;
+let timerVal=30;
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+
+// Shuffle-bag system: cycles through ALL items before repeating
+const _bags={};
+function pickUnique(arr,key){
+  if(!_bags[key]||_bags[key].length===0) _bags[key]=shuffle(arr);
+  return _bags[key].pop();
+}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+
+function getMode(){
+  if(modeQueue.length===0) modeQueue=shuffle(MODES);
+  // Prevent adjacent repeat at dequeue time — re-shuffle if needed
+  let safety=0;
+  while(modeQueue[0]===lastMode && safety++<10){
+    if(modeQueue.length>1) modeQueue.push(modeQueue.shift());
+    else { modeQueue=shuffle(MODES); }
+  }
+  const m=modeQueue.shift();
+  lastMode=m;return m;
+}
+
+function renderStats(){
+  const chosen=shuffle(STATS_POOL).slice(0,3);
+  return chosen.map((s,i)=>`<div class="stat-chip" style="animation-delay:${i*0.1}s"><span class="num">${s.n}</span>${s.l}</div>`).join('');
+}
+
+function renderQuiz(){
+  const q=pickUnique(QUIZZES,'quiz'),L=['A','B','C'];
+  return `<div class="mq mode-enter">
+    <div style="text-align:center"><div class="badge badge-warm">Science Quiz</div></div>
+    <div class="card q-box"><h2>${q.q}</h2></div>
+    <div class="opts">${q.o.map((o,i)=>`<div class="opt" onclick="reveal()"><div class="ltr">${L[i]}</div><div class="otxt">${o}</div></div>`).join('')}</div>
+    <div class="chat-cta"><h3>Type A, B, or C in Chat!</h3><p>Answer reveals in 30 seconds</p></div>
+    <div class="timer-wrap"><div class="timer-lbl" id="tlbl">0:30</div><div class="timer-track"><div class="timer-bar" id="tbar"></div></div></div>
+    <div class="answer-reveal" id="ans"><h4>Answer</h4><div class="ans">${L[q.a]}: ${q.o[q.a]}</div><div class="expl">${q.e}</div></div>
+  </div>`;
+}
+
+function startTimer(){
+  timerVal=30;if(quizTimer)clearInterval(quizTimer);
+  quizTimer=setInterval(()=>{
+    timerVal--;
+    const l=document.getElementById('tlbl'),b=document.getElementById('tbar');
+    if(l)l.textContent=`0:${timerVal.toString().padStart(2,'0')}`;
+    if(b)b.style.width=((timerVal/30)*100)+'%';
+    if(timerVal<=0){clearInterval(quizTimer);reveal()}
+  },1000);
+}
+
+function renderFact(){
+  const f=pickUnique(FACTS,'fact');
+  const link=f.url?`<a href="${f.url}" target="_blank" class="read-more">Read More →</a>`:'';
+  return `<div class="mf mode-enter">
+    <div style="text-align:center"><div class="badge badge-sage">Science Fact</div></div>
+    <div class="card fact-card">
+      <img class="fact-img" src="${f.img}" alt="" onerror="this.style.display='none'"/>
+      <div class="fact-body"><span class="fact-icon">${f.i}</span><h2>${f.t}</h2><p>${f.d}</p><div class="fact-source">${f.s}</div>${link}</div>
+    </div>
+  </div>`;
+}
+
+function renderNews(){
+  const n=pickUnique(NEWS,'news');
+  const link=n.url?`<a href="${n.url}" target="_blank" class="read-more">Read More →</a>`:'';
+  return `<div class="mn mode-enter">
+    <div style="text-align:center"><div class="badge badge-slate">Trending in Science</div></div>
+    <div class="card news-card"><span class="news-icon">${n.i}</span><div class="news-cat">${n.c}</div><h2>${n.t}</h2><p>${n.d}</p>
+      <div class="news-source"><span class="dot"></span>Source: ${n.s}</div>${link}
+    </div>
+  </div>`;
+}
+
+function renderThisOrThat(){
+  const t=pickUnique(THIS_OR_THAT,'tot');
+  return `<div class="mt mode-enter">
+    <div style="text-align:center"><div class="badge badge-gold">This or That</div></div>
+    <div class="tot-header"><h2>${t.q}</h2><p>Type A or B in Chat!</p></div>
+    <div class="tot-vs">
+      <div class="tot-option" onclick="revealTot()"><span class="tot-emoji">${t.a}</span><div class="tot-label">${t.al}</div><div class="tot-letter">A</div></div>
+      <div class="tot-divider">VS</div>
+      <div class="tot-option" onclick="revealTot()"><span class="tot-emoji">${t.b}</span><div class="tot-label">${t.bl}</div><div class="tot-letter">B</div></div>
+    </div>
+    <div class="timer-wrap"><div class="timer-lbl" id="tlbl">0:20</div><div class="timer-track"><div class="timer-bar" id="tbar"></div></div></div>
+    <div class="tot-reveal" id="totans"><h4>Answer</h4><div class="ans">${t.ans}</div><div class="expl">${t.e}</div></div>
+  </div>`;
+}
+function startTotTimer(){
+  timerVal=20;if(quizTimer)clearInterval(quizTimer);
+  quizTimer=setInterval(()=>{
+    timerVal--;
+    const l=document.getElementById('tlbl'),b=document.getElementById('tbar');
+    if(l)l.textContent='0:'+timerVal.toString().padStart(2,'0');
+    if(b)b.style.width=((timerVal/20)*100)+'%';
+    if(timerVal<=0){clearInterval(quizTimer);revealTot()}
+  },1000);
+}
+function revealTot(){
+  if(quizTimer)clearInterval(quizTimer);
+  const a=document.getElementById('totans'),l=document.getElementById('tlbl'),b=document.getElementById('tbar');
+  if(a){a.classList.add('show');setTimeout(()=>a.scrollIntoView({behavior:'smooth',block:'center'}),100)}
+  if(l)l.textContent='0:00';if(b)b.style.width='0%';
+  playSfx('reveal');
+}
+
+function renderSpotlight(){
+  const s=pickUnique(SCIENTISTS,'scientist');
+  return `<div class="ms mode-enter">
+    <div style="text-align:center"><div class="badge badge-sage">Scientist Spotlight</div></div>
+    <div class="card spot-card">
+      <img class="spot-photo" src="${s.img}" alt="${s.name}" onerror="this.style.display='none'"/>
+      <div class="spot-name">${s.name}</div>
+      <div class="spot-title">${s.title}</div>
+      <div class="spot-inst">${s.inst}</div>
+      <div class="spot-tags">${s.tags.map(t=>`<span class="spot-tag">${t}</span>`).join('')}</div>
+      <div class="spot-breakthrough"><h3>Latest Breakthrough</h3><p>${s.breakthrough}</p></div>
+      <div class="spot-source">${s.s}</div>
+      ${s.wiki?`<a href="${s.wiki}" target="_blank" class="read-more">Wikipedia →</a>`:''}
+    </div>
+  </div>`;
+}
+
+function renderOutbreak(){
+  const o=pickUnique(OUTBREAKS,'outbreak');
+  return `<div class="mo mode-enter">
+    <div style="text-align:center"><div class="badge badge-warm">USA Outbreak Report</div></div>
+    <div class="card outbreak-card">
+      <div class="outbreak-header">
+        <span class="outbreak-emoji">${o.emoji}</span>
+        <span class="outbreak-disease">${o.disease}</span>
+        <span class="outbreak-status">${o.status} · ${o.year}</span>
+      </div>
+      <div class="outbreak-headline">${o.headline}</div>
+      <div class="outbreak-stats">${o.stats.map(s=>`<div class="ob-stat"><div class="ob-stat-val ${s.trend}">${s.value}</div><div class="ob-stat-label">${s.label}</div></div>`).join('')}</div>
+      <div class="outbreak-detail">${o.detail}</div>
+      <div class="outbreak-cdc">${o.cdc}</div>
+      ${o.url?`<a href="${o.url}" target="_blank" class="read-more">Read More →</a>`:''}
+    </div>
+  </div>`;
+}
+
+function renderBreakthrough(){
+  const b=pickUnique(BREAKTHROUGHS,'breakthrough');
+  return `<div class="mb mode-enter">
+    <div style="text-align:center"><div class="badge badge-gold">Breakthrough You Missed</div></div>
+    <div class="card break-card" style="text-align:center">
+      <div class="break-year">${b.year}</div>
+      <div class="break-emoji">${b.emoji}</div>
+      <div class="break-title">${b.title}</div>
+      <div class="break-simple" style="text-align:left">${b.simple}</div>
+      <div class="break-impact" style="text-align:left">
+        <div class="break-impact-label">Why It Matters Today</div>
+        <div class="break-impact-text">${b.impact}</div>
+      </div>
+      <div class="break-source">${b.s}</div>
+      ${b.url?`<a href="${b.url}" target="_blank" class="read-more">Read More →</a>`:''}
+    </div>
+  </div>`;
+}
+
+function renderMyth(){
+  const m=pickUnique(MYTHS,'myth');
+  const vc=m.verdict==='FALSE'?'false':m.verdict==='MISLEADING'?'misleading':'misunderstood';
+  return `<div class="mm mode-enter">
+    <div style="text-align:center"><div class="badge badge-warm">Myth Buster</div></div>
+    <div class="card myth-card">
+      <div style="text-align:center"><span class="myth-verdict ${vc}">${m.verdict}</span></div>
+      <div class="myth-claim">${m.myth}</div>
+      <div class="myth-conspiracy">${m.conspiracy}</div>
+      <div class="myth-science-label">The Actual Science</div>
+      <div class="myth-science">${m.science}</div>
+      <div class="myth-evidence">Evidence: ${m.evidence}</div>
+      ${m.url?`<a href="${m.url}" target="_blank" class="read-more">Read More →</a>`:''}
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// AUDIO — Procedural ambient via Web Audio API (no external deps)
+// ============================================================
+let audioCtx=null,audioOn=true;
+// ============================================================
+// VOICE DETECTION + AUTO-CYCLE
+// ============================================================
+let micStream=null,micAnalyser=null,micData=null,micOn=false;
+let micLevel=0; // 0-1, exposed globally for viz reactivity
+let isSpeaking=false,silenceStart=0;
+const SILENCE_TRIGGER=2500; // ms of silence before next card
+const SPEAK_THRESHOLD=0.06; // volume threshold for "speaking"
+let cycleTimer=null,cycleStart=0,cycleDuration=30000;
+let cycleRAF=null;
+
+function getCycleDuration(){
+  // Quiz and ThisOrThat get extra time
+  const m=lastMode;
+  return (m==='quiz'||m==='thisorthat')?45000:30000;
+}
+
+function startCycleTimer(){
+  clearTimeout(cycleTimer);
+  cancelAnimationFrame(cycleRAF);
+  cycleDuration=getCycleDuration();
+  cycleStart=Date.now();
+  const bar=document.getElementById('cycleBar');
+  if(bar)bar.style.transition='none',bar.style.width='0%';
+  // Animate progress bar
+  requestAnimationFrame(()=>{
+    if(bar)bar.style.transition=`width ${cycleDuration/1000}s linear`,bar.style.width='100%';
+  });
+  cycleTimer=setTimeout(()=>transitionToNext(),cycleDuration);
+}
+
+function transitionToNext(){
+  clearTimeout(cycleTimer);
+  const el=document.getElementById('content');
+  // Dissolve out
+  el.classList.add('dissolve-out');
+  setTimeout(()=>{
+    el.classList.remove('dissolve-out');
+    loadNewContent();
+    el.classList.add('dissolve-in');
+    setTimeout(()=>el.classList.remove('dissolve-in'),450);
+    startCycleTimer();
+  },300);
+}
+
+// Mic monitoring loop
+function micLoop(){
+  if(!micAnalyser||!micOn)return;
+  micAnalyser.getByteFrequencyData(micData);
+  // Compute RMS level
+  let sum=0;
+  for(let i=0;i<micData.length;i++)sum+=micData[i]*micData[i];
+  micLevel=Math.sqrt(sum/micData.length)/255; // 0-1
+
+  const wasSpeaking=isSpeaking;
+  isSpeaking=micLevel>SPEAK_THRESHOLD;
+
+  if(isSpeaking){
+    silenceStart=0; // reset silence timer while speaking
+  } else if(wasSpeaking && !isSpeaking){
+    // Just went silent
+    silenceStart=Date.now();
+  } else if(!isSpeaking && silenceStart>0){
+    // Check if silence long enough to trigger
+    if(Date.now()-silenceStart>=SILENCE_TRIGGER){
+      silenceStart=0;
+      transitionToNext();
+    }
+  }
+
+  requestAnimationFrame(micLoop);
+}
+
+async function toggleMic(){
+  const pill=document.getElementById('micPill');
+  if(micOn){
+    // Turn off
+    micOn=false;
+    micLevel=0;
+    if(micStream)micStream.getTracks().forEach(t=>t.stop());
+    micStream=null;micAnalyser=null;micData=null;
+    pill.classList.remove('listening');
+    return;
+  }
+  // Turn on — request mic
+  try{
+    micStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    if(!audioCtx)initAudio();
+    const src=audioCtx.createMediaStreamSource(micStream);
+    micAnalyser=audioCtx.createAnalyser();
+    micAnalyser.fftSize=256;
+    micAnalyser.smoothingTimeConstant=0.8;
+    src.connect(micAnalyser);
+    micData=new Uint8Array(micAnalyser.frequencyBinCount);
+    micOn=true;
+    pill.classList.add('listening');
+    micLoop();
+  }catch(e){
+    console.log('Mic access denied');
+  }
+}
+
+function playSfxTone(type){
+  if(!audioCtx||!audioOn)return;
+  const now=audioCtx.currentTime;
+  const o=audioCtx.createOscillator();
+  const g=audioCtx.createGain();
+  o.connect(g);g.connect(audioCtx.destination);
+  if(type==='reveal'){
+    // Rising chime
+    o.type='sine';o.frequency.value=600;
+    o.frequency.linearRampToValueAtTime(1200,now+0.15);
+    g.gain.value=0.2;g.gain.linearRampToValueAtTime(0,now+0.5);
+    o.start(now);o.stop(now+0.5);
+    // Second tone
+    const o2=audioCtx.createOscillator(),g2=audioCtx.createGain();
+    o2.connect(g2);g2.connect(audioCtx.destination);
+    o2.type='sine';o2.frequency.value=900;
+    o2.frequency.linearRampToValueAtTime(1500,now+0.25);
+    g2.gain.value=0.15;g2.gain.linearRampToValueAtTime(0,now+0.6);
+    o2.start(now+0.1);o2.stop(now+0.6);
+  } else {
+    // Soft whoosh/tick for transitions
+    o.type='triangle';o.frequency.value=300;
+    o.frequency.linearRampToValueAtTime(100,now+0.2);
+    g.gain.value=0.12;g.gain.linearRampToValueAtTime(0,now+0.25);
+    o.start(now);o.stop(now+0.25);
+  }
+}
+
+function initAudio(){
+  try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){return}
+  const btn=document.getElementById('audioBtn');
+  btn.classList.add('active');
+  if(audioCtx.state==='suspended'){
+    const resume=()=>{audioCtx.resume();
+      document.removeEventListener('click',resume);document.removeEventListener('touchstart',resume)};
+    document.addEventListener('click',resume);document.addEventListener('touchstart',resume);
+  }
+}
+function toggleAudio(){
+  const btn=document.getElementById('audioBtn');
+  audioOn=!audioOn;btn.classList.toggle('active',audioOn);
+  if(audioOn){
+    if(!audioCtx)initAudio();
+    else if(audioCtx.state==='suspended')audioCtx.resume();
+  } else {
+    if(audioCtx)audioCtx.suspend();
+  }
+}
+function playSfx(t){ playSfxTone(t); }
+
+// ============================================================
+// MAIN
+// ============================================================
+function reveal(){
+  if(quizTimer)clearInterval(quizTimer);
+  const a=document.getElementById('ans'),l=document.getElementById('tlbl'),b=document.getElementById('tbar');
+  if(a){a.classList.add('show');setTimeout(()=>a.scrollIntoView({behavior:'smooth',block:'center'}),100)}
+  if(l)l.textContent='0:00';if(b)b.style.width='0%';
+  playSfx('reveal');
+}
+
+function loadNewContent(){
+  if(quizTimer)clearInterval(quizTimer);
+  playSfx('transition');
+  document.getElementById('stats').innerHTML=renderStats();
+  const el=document.getElementById('content');
+  const mode=getMode();
+  switch(mode){
+    case 'quiz':el.innerHTML=renderQuiz();startTimer();break;
+    case 'fact':el.innerHTML=renderFact();break;
+    case 'news':el.innerHTML=renderNews();break;
+    case 'thisorthat':el.innerHTML=renderThisOrThat();startTotTimer();break;
+    case 'spotlight':el.innerHTML=renderSpotlight();break;
+    case 'outbreak':el.innerHTML=renderOutbreak();break;
+    case 'breakthrough':el.innerHTML=renderBreakthrough();break;
+    case 'mythbuster':el.innerHTML=renderMyth();break;
+  }
+  initViz();
+}
+
+function initTicker(){
+  const el=document.getElementById('ticker');
+  const s=shuffle(TICKER);
+  el.innerHTML=[...s,...s].map(t=>`<span>${t.replace(/@drgregshow/g,'<b class="hl">@drgregshow</b>').replace(/patreon\.com\/drgregshow/g,'<b class="hl">patreon.com/drgregshow</b>')}</span>`).join('');
+}
+
+// Boot
+initTicker();
+initAudio();
+loadNewContent();
+startCycleTimer();
+window.addEventListener('resize',()=>{if(currentViz)initViz()});
+</script>
+</body>
+</html>

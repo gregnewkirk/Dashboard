@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#16213e"/></linearGradient></defs>
+  <circle cx="60" cy="60" r="58" fill="url(#bg)" stroke="#85b89a" stroke-width="2" opacity="0.9"/>
+  <!-- Shield (immune protection) -->
+  <path d="M60,18 L85,32 L85,58 Q85,78 60,92 Q35,78 35,58 L35,32 Z" fill="none" stroke="#85b89a" stroke-width="2.5" opacity="0.6"/>
+  <path d="M60,24 L80,36 L80,56 Q80,73 60,85 Q40,73 40,56 L40,36 Z" fill="#85b89a" opacity="0.08"/>
+  <!-- Spike protein (her design) -->
+  <g transform="translate(60,52)">
+    <circle cx="0" cy="0" r="10" fill="#dbb976" opacity="0.3"/>
+    <circle cx="0" cy="0" r="5" fill="#dbb976" opacity="0.5"/>
+    <!-- Spikes -->
+    <line x1="0" y1="-10" x2="0" y2="-18" stroke="#dbb976" stroke-width="2" opacity="0.7"/>
+    <circle cx="0" cy="-19" r="2.5" fill="#dbb976" opacity="0.6"/>
+    <line x1="9" y1="-5" x2="15" y2="-10" stroke="#dbb976" stroke-width="2" opacity="0.7"/>
+    <circle cx="16" cy="-11" r="2.5" fill="#dbb976" opacity="0.6"/>
+    <line x1="-9" y1="-5" x2="-15" y2="-10" stroke="#dbb976" stroke-width="2" opacity="0.7"/>
+    <circle cx="-16" cy="-11" r="2.5" fill="#dbb976" opacity="0.6"/>
+    <line x1="9" y1="5" x2="15" y2="10" stroke="#dbb976" stroke-width="2" opacity="0.6"/>
+    <circle cx="16" cy="11" r="2" fill="#dbb976" opacity="0.5"/>
+    <line x1="-9" y1="5" x2="-15" y2="10" stroke="#dbb976" stroke-width="2" opacity="0.6"/>
+    <circle cx="-16" cy="11" r="2" fill="#dbb976" opacity="0.5"/>
+  </g>
+  <!-- Syringe -->
+  <g transform="translate(88,80) rotate(-45)">
+    <rect x="-2" y="-10" width="4" height="14" rx="1" fill="#8da3cc" opacity="0.5"/>
+    <line x1="0" y1="4" x2="0" y2="7" stroke="#8da3cc" stroke-width="1.5" opacity="0.5"/>
+  </g>
+  <text x="60" y="108" text-anchor="middle" font-family="sans-serif" font-size="7" font-weight="bold" fill="#85b89a" opacity="0.6">VACCINE ARCHITECT</text>
+</svg>

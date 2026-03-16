@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#16213e"/></linearGradient>
+    <linearGradient id="dna" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#85b89a"/><stop offset="100%" stop-color="#6b8f7a"/></linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="58" fill="url(#bg)" stroke="#85b89a" stroke-width="2" opacity="0.9"/>
+  <!-- DNA strand -->
+  <path d="M35,25 Q60,40 35,55 Q60,70 35,85" fill="none" stroke="#85b89a" stroke-width="3" opacity="0.8"/>
+  <path d="M55,25 Q30,40 55,55 Q30,70 55,85" fill="none" stroke="#dbb976" stroke-width="3" opacity="0.8"/>
+  <!-- Rungs -->
+  <line x1="38" y1="32" x2="52" y2="32" stroke="#8da3cc" stroke-width="1.5" opacity="0.4"/>
+  <line x1="35" y1="44" x2="55" y2="44" stroke="#8da3cc" stroke-width="1.5" opacity="0.4"/>
+  <line x1="38" y1="56" x2="52" y2="56" stroke="#8da3cc" stroke-width="1.5" opacity="0.4"/>
+  <line x1="35" y1="68" x2="55" y2="68" stroke="#8da3cc" stroke-width="1.5" opacity="0.4"/>
+  <line x1="38" y1="80" x2="52" y2="80" stroke="#8da3cc" stroke-width="1.5" opacity="0.4"/>
+  <!-- Pencil (base editing) -->
+  <g transform="translate(72,30) rotate(30)">
+    <rect x="-4" y="-25" width="8" height="35" rx="1" fill="#dbb976" opacity="0.9"/>
+    <polygon points="-4,10 4,10 0,18" fill="#d0946e"/>
+    <rect x="-4" y="-25" width="8" height="6" rx="1" fill="#b07a5e"/>
+  </g>
+  <!-- Sparkle -->
+  <circle cx="85" cy="75" r="3" fill="#dbb976" opacity="0.7"/>
+  <circle cx="78" cy="85" r="2" fill="#85b89a" opacity="0.5"/>
+  <text x="60" y="108" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="bold" fill="#dbb976" opacity="0.6">BASE EDITOR</text>
+</svg>

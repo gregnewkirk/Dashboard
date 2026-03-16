@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#16213e"/></linearGradient></defs>
+  <circle cx="60" cy="60" r="58" fill="url(#bg)" stroke="#dbb976" stroke-width="2" opacity="0.9"/>
+  <!-- CRISPR Screen Grid -->
+  <g transform="translate(22,22)">
+    <rect x="0" y="0" width="76" height="56" rx="3" fill="none" stroke="#8da3cc" stroke-width="1.5" opacity="0.4"/>
+    <!-- Grid wells -->
+    <g opacity="0.5">
+      <circle cx="10" cy="10" r="4" fill="#85b89a" opacity="0.6"/><circle cx="24" cy="10" r="4" fill="#85b89a" opacity="0.3"/>
+      <circle cx="38" cy="10" r="4" fill="#d0946e" opacity="0.7"/><circle cx="52" cy="10" r="4" fill="#85b89a" opacity="0.4"/>
+      <circle cx="66" cy="10" r="4" fill="#dbb976" opacity="0.5"/>
+      <circle cx="10" cy="24" r="4" fill="#8da3cc" opacity="0.4"/><circle cx="24" cy="24" r="4" fill="#d0946e" opacity="0.5"/>
+      <circle cx="38" cy="24" r="4" fill="#dbb976" opacity="0.8"/><circle cx="52" cy="24" r="4" fill="#85b89a" opacity="0.3"/>
+      <circle cx="66" cy="24" r="4" fill="#8da3cc" opacity="0.6"/>
+      <circle cx="10" cy="38" r="4" fill="#dbb976" opacity="0.3"/><circle cx="24" cy="38" r="4" fill="#85b89a" opacity="0.7"/>
+      <circle cx="38" cy="38" r="4" fill="#8da3cc" opacity="0.4"/><circle cx="52" cy="38" r="4" fill="#d0946e" opacity="0.6"/>
+      <circle cx="66" cy="38" r="4" fill="#85b89a" opacity="0.5"/>
+      <circle cx="10" cy="48" r="3" fill="#8da3cc" opacity="0.3"/><circle cx="24" cy="48" r="3" fill="#d0946e" opacity="0.4"/>
+      <circle cx="38" cy="48" r="3" fill="#85b89a" opacity="0.5"/><circle cx="52" cy="48" r="3" fill="#dbb976" opacity="0.6"/>
+      <circle cx="66" cy="48" r="3" fill="#d0946e" opacity="0.3"/>
+    </g>
+    <!-- Hit highlight -->
+    <circle cx="38" cy="24" r="6" fill="none" stroke="#dbb976" stroke-width="1.5" opacity="0.8"/>
+  </g>
+  <!-- Magnifying glass on hit -->
+  <g transform="translate(78,58)">
+    <circle cx="0" cy="0" r="8" fill="none" stroke="#dbb976" stroke-width="2" opacity="0.6"/>
+    <line x1="6" y1="6" x2="14" y2="14" stroke="#dbb976" stroke-width="2.5" opacity="0.6"/>
+  </g>
+  <text x="60" y="108" text-anchor="middle" font-family="sans-serif" font-size="7" font-weight="bold" fill="#dbb976" opacity="0.6">CRISPR SCREENS</text>
+</svg>

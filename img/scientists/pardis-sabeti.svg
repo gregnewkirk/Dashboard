@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#16213e"/></linearGradient></defs>
+  <circle cx="60" cy="60" r="58" fill="url(#bg)" stroke="#d0946e" stroke-width="2" opacity="0.9"/>
+  <!-- Virus particles -->
+  <circle cx="30" cy="35" r="8" fill="none" stroke="#d0946e" stroke-width="1.5" opacity="0.6"/>
+  <circle cx="30" cy="35" r="3" fill="#d0946e" opacity="0.3"/>
+  <line x1="30" y1="27" x2="30" y2="23" stroke="#d0946e" stroke-width="1" opacity="0.4"/>
+  <line x1="37" y1="32" x2="40" y2="30" stroke="#d0946e" stroke-width="1" opacity="0.4"/>
+  <line x1="23" y1="32" x2="20" y2="30" stroke="#d0946e" stroke-width="1" opacity="0.4"/>
+  <!-- Genome sequence readout -->
+  <g transform="translate(50,28)">
+    <text font-family="monospace" font-size="6" fill="#85b89a" opacity="0.5">ATCGATCG</text>
+    <text y="8" font-family="monospace" font-size="6" fill="#dbb976" opacity="0.5">GCTAGCTA</text>
+    <text y="16" font-family="monospace" font-size="6" fill="#8da3cc" opacity="0.5">ATCGATCG</text>
+    <text y="24" font-family="monospace" font-size="6" fill="#d0946e" opacity="0.5">TAGCTAGC</text>
+  </g>
+  <!-- Phylogenetic tree -->
+  <g transform="translate(35,65)" opacity="0.7">
+    <line x1="0" y1="0" x2="20" y2="-12" stroke="#85b89a" stroke-width="1.5"/>
+    <line x1="0" y1="0" x2="20" y2="12" stroke="#85b89a" stroke-width="1.5"/>
+    <line x1="20" y1="-12" x2="40" y2="-18" stroke="#dbb976" stroke-width="1.5"/>
+    <line x1="20" y1="-12" x2="40" y2="-6" stroke="#dbb976" stroke-width="1.5"/>
+    <line x1="20" y1="12" x2="40" y2="6" stroke="#8da3cc" stroke-width="1.5"/>
+    <line x1="20" y1="12" x2="40" y2="18" stroke="#8da3cc" stroke-width="1.5"/>
+    <circle cx="40" cy="-18" r="2.5" fill="#dbb976" opacity="0.6"/>
+    <circle cx="40" cy="-6" r="2.5" fill="#dbb976" opacity="0.6"/>
+    <circle cx="40" cy="6" r="2.5" fill="#8da3cc" opacity="0.6"/>
+    <circle cx="40" cy="18" r="2.5" fill="#d0946e" opacity="0.8"/>
+  </g>
+  <text x="60" y="108" text-anchor="middle" font-family="sans-serif" font-size="7" font-weight="bold" fill="#d0946e" opacity="0.6">OUTBREAK GENOMICS</text>
+</svg>
