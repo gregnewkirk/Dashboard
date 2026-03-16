@@ -1453,3 +1453,109 @@ const VIZ_LABELS = {
   translation:'Protein Synthesis',splicing:'mRNA Splicing',gelelectro:'Gel Electrophoresis',
   plasmid:'Plasmid Cloning',crispr:'CRISPR-Cas9 Editing'
 };
+
+// ============================================================
+// SHOUTOUT SYSTEM — Stripe / Venmo / Patreon contributors
+// ============================================================
+const SHOUTOUTS = [
+  // Add real contributors here — populated via webhook or manually
+  // Format: { name: "...", platform: "stripe|venmo|patreon", amount: "...", message: "..." }
+  { name: "Science Supporter", platform: "patreon", amount: "$5", message: "Love the show!" },
+  { name: "BioNerd42", platform: "venmo", amount: "$10", message: "Keep debunking!" },
+  { name: "Anonymous", platform: "stripe", amount: "$25", message: "" },
+];
+
+const PLATFORM_CONFIG = {
+  stripe:  { icon: "💳", color: "#6772e5", label: "Tip" },
+  venmo:   { icon: "💙", color: "#3d95ce", label: "Venmo" },
+  patreon: { icon: "🎨", color: "#ff424d", label: "Patreon" },
+};
+
+// Call this to show a one-time shoutout overlay (e.g., triggered by webhook)
+function showShoutout(contributor) {
+  const cfg = PLATFORM_CONFIG[contributor.platform] || PLATFORM_CONFIG.stripe;
+  const el = document.createElement('div');
+  el.id = 'shoutout-toast';
+  el.style.cssText = `
+    position:fixed;
+    bottom:90px;
+    right:24px;
+    z-index:9999;
+    background:rgba(12,12,34,0.95);
+    border:2px solid ${cfg.color}60;
+    border-left:4px solid ${cfg.color};
+    border-radius:12px;
+    padding:14px 18px;
+    max-width:320px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.6), 0 0 20px ${cfg.color}30;
+    animation:shoutoutIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+    font-family:'DM Sans',sans-serif;
+  `;
+  el.innerHTML = `
+    <style>
+      @keyframes shoutoutIn {
+        from { opacity:0; transform:translateX(40px) scale(0.9); }
+        to   { opacity:1; transform:translateX(0) scale(1); }
+      }
+      @keyframes shoutoutOut {
+        from { opacity:1; transform:translateX(0) scale(1); }
+        to   { opacity:0; transform:translateX(40px) scale(0.9); }
+      }
+    </style>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <span style="font-size:1.4rem">${cfg.icon}</span>
+      <div>
+        <div style="font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:${cfg.color};margin-bottom:2px">${cfg.label} Shoutout</div>
+        <div style="font-size:1rem;font-weight:900;color:#fff">${contributor.name}</div>
+      </div>
+      ${contributor.amount ? `<div style="margin-left:auto;font-size:1rem;font-weight:900;color:#ffe080">${contributor.amount}</div>` : ''}
+    </div>
+    ${contributor.message ? `<div style="font-size:0.78rem;color:#ccc;font-style:italic;border-top:1px solid rgba(255,255,255,0.1);padding-top:6px;margin-top:4px">"${contributor.message}"</div>` : ''}
+    <div style="margin-top:8px;font-size:0.6rem;color:#666;font-weight:700;text-transform:uppercase;letter-spacing:1px">🧬 Thank you for supporting science!</div>
+  `;
+
+  // Remove existing toast if present
+  const existing = document.getElementById('shoutout-toast');
+  if (existing) existing.remove();
+
+  document.body.appendChild(el);
+
+  // Auto-dismiss after 6 seconds
+  setTimeout(() => {
+    el.style.animation = 'shoutoutOut 0.3s ease forwards';
+    setTimeout(() => el.remove(), 300);
+  }, 6000);
+}
+
+// Queue-based shoutout display — cycle through contributors during stream
+let _shoutoutQueue = [];
+let _shoutoutTimer = null;
+
+function queueShoutouts(contributors) {
+  _shoutoutQueue = [...contributors];
+  clearInterval(_shoutoutTimer);
+  _shoutoutTimer = setInterval(() => {
+    if (_shoutoutQueue.length === 0) {
+      clearInterval(_shoutoutTimer);
+      return;
+    }
+    showShoutout(_shoutoutQueue.shift());
+  }, 15000); // Show one every 15 seconds
+  // Show first one immediately
+  if (_shoutoutQueue.length > 0) showShoutout(_shoutoutQueue.shift());
+}
+
+// Auto-cycle shoutouts from SHOUTOUTS array every 2 minutes during stream
+function startShoutoutCycle() {
+  if (SHOUTOUTS.length === 0) return;
+  let idx = 0;
+  setInterval(() => {
+    showShoutout(SHOUTOUTS[idx % SHOUTOUTS.length]);
+    idx++;
+  }, 120000); // Every 2 minutes
+}
+
+// Expose globally for webhook use
+window.showShoutout = showShoutout;
+window.queueShoutouts = queueShoutouts;
+window.startShoutoutCycle = startShoutoutCycle;
